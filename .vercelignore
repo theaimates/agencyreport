@@ -1,7 +1,7 @@
-# Python automation tools — local/server use only, not for Vercel
+# Python automation tools — local/server use only
 tools/
 
-# n8n workflow JSON files — imported into n8n directly, not hosted on Vercel
+# n8n workflow JSON files — imported into n8n directly
 workflows/
 
 # Static marketing frontend — separate deployment if needed

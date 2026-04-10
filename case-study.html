@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Study — ReportFlow · Johyandi Lukmana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:       #0f172a;
+  --ink2:      #334155;
+  --ink3:      #64748b;
+  --ink4:      #94a3b8;
+  --line:      #e2e8f0;
+  --bg:        #ffffff;
+  --bg2:       #f8fafc;
+  --accent:    #4f46e5;
+  --accent2:   #6366f1;
+  --accent-l:  #eef2ff;
+  --accent-ll: #f5f3ff;
+  --green:     #16a34a;
+  --green-l:   #dcfce7;
+  --amber:     #d97706;
+  --amber-l:   #fef3c7;
+  --red:       #dc2626;
+  --red-l:     #fee2e2;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: #e2e8f0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* ── Page shell ─────────────────────────────────────────── */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  background: var(--bg);
+  margin: 24px auto;
+  box-shadow: 0 4px 48px rgba(0,0,0,0.13);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Page number ────────────────────────────────────────── */
+.page-num {
+  position: absolute;
+  bottom: 18px;
+  right: 36px;
+  font-size: 9px;
+  color: var(--ink4);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE 1 — COVER
+════════════════════════════════════════════════════════ */
+.cover {
+  display: flex;
+  flex-direction: column;
+  height: 297mm;
+}
+
+.cover-top-bar {
+  height: 6px;
+  background: linear-gradient(90deg, #4f46e5, #7c3aed, #a855f7);
+}
+
+.cover-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 52px 52px 0;
+}
+
+.cover-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 36px;
+}
+
+.eyebrow-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.eyebrow-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--ink4);
+}
+
+.eyebrow-tag {
+  font-size: 10px;
+  color: var(--ink3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em;
+}
+
+.cover-title {
+  font-size: 52px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -2px;
+  line-height: 1.0;
+  margin-bottom: 12px;
+}
+
+.cover-title span {
+  color: var(--accent);
+}
+
+.cover-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink2);
+  line-height: 1.5;
+  max-width: 420px;
+  margin-bottom: 48px;
+}
+
+/* Cover metrics row */
+.cover-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.cover-metric {
+  padding: 20px 22px;
+  border-right: 1px solid var(--line);
+}
+.cover-metric:last-child { border-right: none; }
+
+.cover-metric-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.cover-metric-label {
+  font-size: 10.5px;
+  color: var(--ink3);
+  line-height: 1.4;
+}
+
+/* Cover stack row */
+.cover-stack-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink4);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+}
+
+.cover-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 40px;
+}
+
+.stack-pill {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 5px 13px;
+  color: var(--ink2);
+}
+
+.stack-pill.primary {
+  background: var(--accent-l);
+  border-color: #a5b4fc;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Cover author block */
+.cover-footer-bar {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding: 22px 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cover-author {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cover-author-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cover-author-role {
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.cover-contact {
+  text-align: right;
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink3);
+  line-height: 1.8;
+}
+
+/* Cover decorative element */
+.cover-deco {
+  position: absolute;
+  top: 0; right: 0;
+  width: 240px; height: 240px;
+  background: radial-gradient(circle at top right, #eef2ff 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════════════
+   SHARED INTERIOR PAGE STYLES
+════════════════════════════════════════════════════════ */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 44px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg2);
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-section-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+}
+
+.page-header-title {
+  font-size: 9px;
+  color: var(--ink4);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.page-header-logo {
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink4);
+}
+
+.page-content {
+  flex: 1;
+  padding: 32px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Section headings ───────────────────────────────────── */
+.section-heading {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.section-heading span { color: var(--accent); }
+
+.section-intro {
+  font-size: 12px;
+  color: var(--ink2);
+  line-height: 1.7;
+  max-width: 520px;
+}
+
+.sub-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+}
+
+/* ── Cards / boxes ──────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.card.accent {
+  background: var(--accent-ll);
+  border-color: #c4b5fd;
+}
+
+.card.warn {
+  background: var(--amber-l);
+  border-color: #fcd34d;
+}
+
+.card.success {
+  background: var(--green-l);
+  border-color: #86efac;
+}
+
+.card.danger {
+  background: var(--red-l);
+  border-color: #fca5a5;
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE 2 — THE PROBLEM
+════════════════════════════════════════════════════════ */
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pain-point {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: var(--bg);
+  border-left: 4px solid var(--red);
+}
+
+.pain-icon {
+  font-size: 18px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.pain-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.pain-desc {
+  font-size: 10.5px;
+  color: var(--ink3);
+  line-height: 1.6;
+}
+
+.before-after {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ba-col {
+  padding: 18px 20px;
+}
+
+.ba-col.before {
+  background: var(--red-l);
+  border-right: 1px solid var(--line);
+}
+
+.ba-col.after {
+  background: var(--green-l);
+}
+
+.ba-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 10px;
+}
+
+.ba-col.before .ba-label { color: var(--red); }
+.ba-col.after .ba-label { color: var(--green); }
+
+.ba-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-bottom: 7px;
+  font-size: 11px;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+
+.ba-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.ba-col.before .ba-dot { background: var(--red); }
+.ba-col.after .ba-dot { background: var(--green); }
+
+.quote-block {
+  background: var(--accent-l);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink2);
+  line-height: 1.65;
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE 3 — THE SOLUTION & ARCHITECTURE
+════════════════════════════════════════════════════════ */
+.architecture-diagram {
+  background: var(--bg2);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 22px 20px;
+}
+
+.arch-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.flow-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.flow-box {
+  flex: 1;
+  background: var(--bg);
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.flow-box.trigger { border-color: #a5b4fc; background: var(--accent-l); }
+.flow-box.ai      { border-color: #c4b5fd; background: #faf5ff; }
+.flow-box.storage { border-color: #86efac; background: var(--green-l); }
+.flow-box.output  { border-color: #fcd34d; background: var(--amber-l); }
+.flow-box.data    { border-color: #93c5fd; background: #eff6ff; }
+
+.flow-box-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.flow-box-sub {
+  font-size: 8.5px;
+  color: var(--ink3);
+}
+
+.flow-arrow-v {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--ink4);
+  font-size: 14px;
+  padding: 2px 0;
+}
+
+.flow-arrow-h {
+  display: flex;
+  align-items: center;
+  color: var(--ink4);
+  font-size: 13px;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.parallel-row {
+  display: grid;
+  gap: 5px;
+}
+.parallel-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+.parallel-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+.parallel-label {
+  text-align: center;
+  font-size: 8px;
+  color: var(--ink4);
+  font-family: 'JetBrains Mono', monospace;
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+/* WAT framework breakdown */
+.wat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.wat-card {
+  border-radius: 10px;
+  padding: 16px 16px;
+  border: 1.5px solid;
+}
+
+.wat-card.w { background: #eff6ff; border-color: #93c5fd; }
+.wat-card.a { background: var(--accent-ll); border-color: #c4b5fd; }
+.wat-card.t { background: #f0fdf4; border-color: #86efac; }
+
+.wat-letter {
+  font-size: 28px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.wat-card.w .wat-letter { color: #2563eb; }
+.wat-card.a .wat-letter { color: var(--accent); }
+.wat-card.t .wat-letter { color: var(--green); }
+
+.wat-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.wat-desc {
+  font-size: 10px;
+  color: var(--ink3);
+  line-height: 1.55;
+}
+
+.wat-example {
+  margin-top: 7px;
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--ink3);
+  background: rgba(255,255,255,0.6);
+  border-radius: 4px;
+  padding: 4px 7px;
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE 4 — TECHNICAL DEEP DIVE
+════════════════════════════════════════════════════════ */
+.nodes-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+}
+
+.nodes-table thead tr {
+  background: var(--bg2);
+  border-bottom: 2px solid var(--line);
+}
+
+.nodes-table th {
+  text-align: left;
+  padding: 9px 12px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nodes-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink2);
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.nodes-table tr:last-child td { border-bottom: none; }
+
+.node-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  color: var(--ink);
+  font-size: 10px;
+}
+
+.node-badge {
+  display: inline-block;
+  font-size: 8.5px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+
+.node-badge.trigger { background: var(--accent-l); color: var(--accent); }
+.node-badge.ai      { background: #faf5ff; color: #7c3aed; border: 1px solid #c4b5fd; }
+.node-badge.util    { background: var(--bg2); color: var(--ink3); border: 1px solid var(--line); }
+.node-badge.storage { background: var(--green-l); color: var(--green); }
+.node-badge.output  { background: var(--amber-l); color: var(--amber); }
+
+.design-decision {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 12px;
+}
+
+.dd-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.dd-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.dd-body {
+  font-size: 10.5px;
+  color: var(--ink3);
+  line-height: 1.55;
+}
+
+.design-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* ════════════════════════════════════════════════════════
+   PAGE 6 — RESULTS & TAKEAWAYS
+════════════════════════════════════════════════════════ */
+.results-big {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.result-card {
+  border-radius: 12px;
+  padding: 20px 18px;
+  text-align: center;
+  border: 1.5px solid;
+}
+
+.result-card.r1 { background: var(--accent-l); border-color: #a5b4fc; }
+.result-card.r2 { background: var(--green-l);  border-color: #86efac; }
+.result-card.r3 { background: var(--amber-l);  border-color: #fcd34d; }
+
+.result-num {
+  font-size: 34px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.result-card.r1 .result-num { color: var(--accent); }
+.result-card.r2 .result-num { color: var(--green); }
+.result-card.r3 .result-num { color: var(--amber); }
+
+.result-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.result-sub {
+  font-size: 10px;
+  color: var(--ink3);
+  line-height: 1.4;
+}
+
+.takeaway-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.takeaway-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.takeaway-num {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+  line-height: 1;
+  padding-top: 1px;
+}
+
+.takeaway-content {}
+
+.takeaway-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.takeaway-body {
+  font-size: 10.5px;
+  color: var(--ink3);
+  line-height: 1.55;
+}
+
+.cta-box {
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  border-radius: 14px;
+  padding: 32px 32px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.cta-text-title {
+  font-size: 19px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.cta-text-sub {
+  font-size: 12.5px;
+  opacity: 0.85;
+  line-height: 1.65;
+}
+
+.cta-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.cta-contact-item {
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace;
+  opacity: 0.95;
+  white-space: nowrap;
+}
+
+/* ── Screenshots ────────────────────────────────────────── */
+.screenshot-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.screenshot-img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.14);
+  object-fit: cover;
+}
+
+.screenshot-caption {
+  font-size: 9.5px;
+  color: var(--ink3);
+  text-align: center;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.screenshot-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ── Print ──────────────────────────────────────────────── */
+@media print {
+  body { background: white; }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+    break-after: page;
+  }
+  .page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 1 — COVER
+══════════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-top-bar"></div>
+  <div class="cover-deco"></div>
+
+  <div class="cover-body">
+
+    <div class="cover-eyebrow">
+      <span class="eyebrow-label">Case Study</span>
+      <span class="eyebrow-dot"></span>
+      <span class="eyebrow-tag">Agency Automation · AI Reporting</span>
+    </div>
+
+    <div class="cover-title">Report<span>Flow</span></div>
+    <div class="cover-subtitle">
+      An automated agency reporting system — 5 data sources, 6 n8n workflows, one weekly email that replaces 4+ hours of manual reporting.
+    </div>
+
+    <div class="cover-metrics">
+      <div class="cover-metric">
+        <div class="cover-metric-num">5</div>
+        <div class="cover-metric-label">Data sources connected<br>(GA4, Meta, Google Ads, Stripe, Mailchimp)</div>
+      </div>
+      <div class="cover-metric">
+        <div class="cover-metric-num">6</div>
+        <div class="cover-metric-label">n8n workflows —<br>writers + reader pattern</div>
+      </div>
+      <div class="cover-metric">
+        <div class="cover-metric-num">~$0.02</div>
+        <div class="cover-metric-label">GPT-4o cost per<br>AI weekly summary</div>
+      </div>
+      <div class="cover-metric">
+        <div class="cover-metric-num">4h→5m</div>
+        <div class="cover-metric-label">Manual reporting time<br>per client per week</div>
+      </div>
+    </div>
+
+    <div class="cover-stack-label">Tech Stack</div>
+    <div class="cover-stack">
+      <span class="stack-pill primary">n8n</span>
+      <span class="stack-pill primary">Airtable</span>
+      <span class="stack-pill primary">GPT-4o</span>
+      <span class="stack-pill">GA4 API</span>
+      <span class="stack-pill">Meta Ads API</span>
+      <span class="stack-pill">Google Ads API</span>
+      <span class="stack-pill">Stripe API</span>
+      <span class="stack-pill">Mailchimp API</span>
+      <span class="stack-pill">Gmail OAuth2</span>
+      <span class="stack-pill">Vanilla JS</span>
+      <span class="stack-pill">Webhook API</span>
+    </div>
+
+    <div class="cover-footer-bar">
+      <div class="cover-author">
+        <div class="cover-author-name">Johyandi Lukmana</div>
+        <div class="cover-author-role">AI Automation Architect</div>
+      </div>
+      <div class="cover-contact">
+        youraimates@gmail.com<br>
+        linkedin.com/in/johyandi-lukmana-932073337<br>
+        upwork.com/freelancers/~01d1a59155f46bc949
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">1 / 6</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 2 — THE PROBLEM
+══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <span class="page-section-tag">01 — The Problem</span>
+    </div>
+    <span class="page-header-logo">ReportFlow · Case Study</span>
+  </div>
+
+  <div class="page-content">
+
+    <div>
+      <div class="section-heading">Agencies spend <span>hours every week</span><br>compiling reports nobody asked for.</div>
+      <div class="section-intro">
+        Marketing agencies manage multiple clients across multiple platforms. Every week, someone manually
+        opens GA4, Meta Business Suite, Google Ads, Stripe, and Mailchimp — copies numbers into a
+        spreadsheet — writes a summary — formats it — and sends it. Then does it again next week.
+      </div>
+    </div>
+
+    <div class="problem-grid">
+      <div class="pain-point">
+        <span class="pain-icon">&#128202;</span>
+        <div class="pain-title">Data scattered across 5+ platforms</div>
+        <div class="pain-desc">GA4, Meta Ads, Google Ads, Stripe, and Mailchimp each have separate dashboards, different date pickers, and inconsistent metric definitions. Compiling them requires logging into each one individually.</div>
+      </div>
+      <div class="pain-point">
+        <span class="pain-icon">&#128336;</span>
+        <div class="pain-title">4+ hours of manual reporting per client</div>
+        <div class="pain-desc">A single weekly client report — pulling data, writing commentary, formatting the PDF — takes 60–90 minutes per client. A 5-client agency spends half a workday on reports that are out of date by the time they're sent.</div>
+      </div>
+      <div class="pain-point">
+        <span class="pain-icon">&#128203;</span>
+        <div class="pain-title">No consistency across reports</div>
+        <div class="pain-desc">Each report is slightly different depending on who wrote it, what they remembered to pull, and how much time they had. Clients notice. Quality degrades under pressure.</div>
+      </div>
+      <div class="pain-point">
+        <span class="pain-icon">&#129504;</span>
+        <div class="pain-title">Zero AI-generated insight</div>
+        <div class="pain-desc">Manual reports present numbers — they rarely explain what the numbers mean or what to do next. The analysis layer gets skipped because there isn't enough time to write it well.</div>
+      </div>
+    </div>
+
+    <div class="before-after">
+      <div class="ba-col before">
+        <div class="ba-label">Before — Manual Process</div>
+        <div class="ba-item"><span class="ba-dot"></span>Log into GA4, Meta, Google Ads, Stripe, Mailchimp separately</div>
+        <div class="ba-item"><span class="ba-dot"></span>Copy-paste numbers into a spreadsheet</div>
+        <div class="ba-item"><span class="ba-dot"></span>Write commentary manually — inconsistent quality</div>
+        <div class="ba-item"><span class="ba-dot"></span>Format and send PDF on Monday morning</div>
+        <div class="ba-item"><span class="ba-dot"></span>Repeat for every client. Every week.</div>
+      </div>
+      <div class="ba-col after">
+        <div class="ba-label">After — ReportFlow</div>
+        <div class="ba-item"><span class="ba-dot"></span>n8n pulls all 5 platforms automatically at 6 AM daily</div>
+        <div class="ba-item"><span class="ba-dot"></span>Airtable stores clean, structured data — always current</div>
+        <div class="ba-item"><span class="ba-dot"></span>GPT-4o generates a structured AI summary every Monday</div>
+        <div class="ba-item"><span class="ba-dot"></span>Email sent automatically at 9 AM with insights + next steps</div>
+        <div class="ba-item"><span class="ba-dot"></span>Dashboard shows live KPIs for every client, always up to date</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      "The bottleneck wasn't analyzing the data — it was finding it. Once collection is automated, everything else follows."
+    </div>
+
+  </div>
+  <div class="page-num">2 / 6</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 3 — THE SOLUTION & ARCHITECTURE
+══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <span class="page-section-tag">02 — Solution &amp; Architecture</span>
+    </div>
+    <span class="page-header-logo">ReportFlow · Case Study</span>
+  </div>
+
+  <div class="page-content">
+
+    <div>
+      <div class="section-heading">Six workflows. <span>One clean separation.</span><br>Writers and a reader.</div>
+      <div class="section-intro">
+        The core architectural principle: workflows WF1–5 are <strong>writers</strong> — they run on schedule and keep Airtable populated.
+        WF6 is the <strong>reader</strong> — it responds to the dashboard in real time.
+        Neither group interferes with the other. Airtable is the single source of truth.
+      </div>
+    </div>
+
+    <div class="architecture-diagram">
+      <div class="arch-title">Data Flow — ReportFlow System</div>
+
+      <div class="parallel-label">Data sources (5 platforms)</div>
+      <div class="parallel-row cols-5" style="margin-bottom:6px">
+        <div class="flow-box data"><div class="flow-box-label">GA4</div><div class="flow-box-sub">Sessions · Revenue</div></div>
+        <div class="flow-box data"><div class="flow-box-label">Meta Ads</div><div class="flow-box-sub">Spend · ROAS</div></div>
+        <div class="flow-box data"><div class="flow-box-label">Google Ads</div><div class="flow-box-sub">Clicks · Conversions</div></div>
+        <div class="flow-box data"><div class="flow-box-label">Stripe</div><div class="flow-box-sub">Revenue · Orders</div></div>
+        <div class="flow-box data"><div class="flow-box-label">Mailchimp</div><div class="flow-box-sub">Opens · CTR</div></div>
+      </div>
+
+      <div class="flow-arrow-v">&#8595;</div>
+
+      <div class="flow-row" style="margin-bottom:6px">
+        <div class="flow-box trigger" style="flex:2"><div class="flow-box-label">WF1 — Daily Data Collection</div><div class="flow-box-sub">Runs 6 AM daily · pulls all 5 APIs · writes raw rows to Airtable</div></div>
+        <div class="flow-arrow-h">&#8594;</div>
+        <div class="flow-box storage" style="flex:1.5"><div class="flow-box-label">Airtable</div><div class="flow-box-sub">6 tables · structured warehouse · single source of truth</div></div>
+      </div>
+
+      <div class="flow-row" style="margin-bottom:6px">
+        <div class="flow-box trigger"><div class="flow-box-label">WF2</div><div class="flow-box-sub">Weekly aggregation Mon 7 AM</div></div>
+        <div class="flow-box trigger"><div class="flow-box-label">WF3</div><div class="flow-box-sub">Monthly aggregation 1st</div></div>
+        <div class="flow-box ai"><div class="flow-box-label">WF4 — AI Reports</div><div class="flow-box-sub">GPT-4o · Mon 8 AM · structured insight</div></div>
+        <div class="flow-box output"><div class="flow-box-label">WF5 — Email Delivery</div><div class="flow-box-sub">Gmail OAuth2 · Mon 9 AM · marks Sent</div></div>
+      </div>
+
+      <div class="flow-arrow-v">&#8595;</div>
+
+      <div class="flow-row">
+        <div class="flow-box trigger" style="flex:1.5"><div class="flow-box-label">WF6 — Dashboard API</div><div class="flow-box-sub">Webhook · on-demand · reads Airtable · responds with JSON</div></div>
+        <div class="flow-arrow-h">&#8594;</div>
+        <div class="flow-box output" style="flex:2"><div class="flow-box-label">Frontend Dashboard</div><div class="flow-box-sub">Vanilla JS · live KPIs + charts + AI summaries per client</div></div>
+      </div>
+    </div>
+
+    <div class="wat-grid">
+      <div class="wat-card w">
+        <div class="wat-letter">W</div>
+        <div class="wat-name">Workflows</div>
+        <div class="wat-desc">Six markdown SOPs define what each automation does, what data it needs, and how failures are handled. The schedule, the API calls, the Airtable writes — all documented before a single node is placed.</div>
+        <div class="wat-example">sync_integrations.md · fetch_dashboard_data.md</div>
+      </div>
+      <div class="wat-card a">
+        <div class="wat-letter">A</div>
+        <div class="wat-name">Agent</div>
+        <div class="wat-desc">GPT-4o acts as the analysis layer — reading the structured Airtable data and writing the "Biggest Win / Watch Closely / Next Move" commentary. It doesn't collect data. It only reasons on clean inputs.</div>
+        <div class="wat-example">WF4: GPT-4o gets structured JSON in, returns HTML out</div>
+      </div>
+      <div class="wat-card t">
+        <div class="wat-letter">T</div>
+        <div class="wat-name">Tools</div>
+        <div class="wat-desc">n8n nodes handle every deterministic step: HTTP requests, Airtable reads/writes, email delivery, webhook routing. These never fail in unpredictable ways — they either work or return a clear error.</div>
+        <div class="wat-example">WF1: 5 HTTP nodes → Airtable Set nodes → structured rows</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">3 / 6</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 4 — TECHNICAL DEEP DIVE
+══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <span class="page-section-tag">03 — Technical Deep Dive</span>
+    </div>
+    <span class="page-header-logo">ReportFlow · Case Study</span>
+  </div>
+
+  <div class="page-content">
+
+    <div>
+      <div class="section-heading">Six workflows. <span>Each with one job.</span></div>
+      <div class="section-intro">
+        Workflow responsibility is strictly scoped — no workflow reads what another writes in the same run.
+        This makes each one independently testable, and means a failure in WF2 never blocks WF6.
+      </div>
+    </div>
+
+    <table class="nodes-table">
+      <thead>
+        <tr>
+          <th>Workflow</th>
+          <th>Schedule</th>
+          <th>What it does</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="node-name">WF1 — Data Collection</span></td>
+          <td>Daily 6:00 AM</td>
+          <td>Calls all 5 platform APIs, writes raw rows to Campaigns, Revenue, KPI Snapshots in Airtable</td>
+          <td><span class="node-badge trigger">Collection</span></td>
+        </tr>
+        <tr>
+          <td><span class="node-name">WF2 — Weekly Aggregation</span></td>
+          <td>Monday 7:00 AM</td>
+          <td>Reads last 7 days of Campaign rows, writes aggregated Channel Performance record per client</td>
+          <td><span class="node-badge util">Aggregation</span></td>
+        </tr>
+        <tr>
+          <td><span class="node-name">WF3 — Monthly Aggregation</span></td>
+          <td>1st of month 8:00 AM</td>
+          <td>Same as WF2 but for the trailing 30 days — populates monthly Channel Performance records</td>
+          <td><span class="node-badge util">Aggregation</span></td>
+        </tr>
+        <tr>
+          <td><span class="node-name">WF4 — AI Report Generation</span></td>
+          <td>Monday 8:00 AM</td>
+          <td>Reads latest KPI + Channel Performance rows per client, sends structured prompt to GPT-4o, saves HTML body + 3 insights to AI Summaries table</td>
+          <td><span class="node-badge ai">AI</span></td>
+        </tr>
+        <tr>
+          <td><span class="node-name">WF5 — Email Delivery</span></td>
+          <td>Monday 9:00 AM</td>
+          <td>Reads all Draft AI Summaries, sends styled HTML email to client contact via Gmail OAuth2, updates status to Sent</td>
+          <td><span class="node-badge output">Delivery</span></td>
+        </tr>
+        <tr>
+          <td><span class="node-name">WF6 — Dashboard API</span></td>
+          <td>On-demand (webhook)</td>
+          <td>Receives client_id from frontend, reads all 6 Airtable tables, returns clean JSON for KPIs, revenue trend, channel mix, campaigns, AI summary</td>
+          <td><span class="node-badge storage">API</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div>
+      <div class="sub-label">Key Design Decisions</div>
+      <div class="design-grid">
+        <div class="design-decision">
+          <span class="dd-icon">&#128230;</span>
+          <div>
+            <div class="dd-title">Airtable as the data warehouse</div>
+            <div class="dd-body">All platform data lands in Airtable — not a custom database. Free plan works. Every row is human-readable and directly editable. If a collection run fails, you can see exactly which rows are missing and backfill manually.</div>
+          </div>
+        </div>
+        <div class="design-decision">
+          <span class="dd-icon">&#128274;</span>
+          <div>
+            <div class="dd-title">No API keys in the frontend</div>
+            <div class="dd-body">The browser only knows the n8n webhook URL — not a secret. All credentials (Airtable, Meta, Stripe, OpenAI) live inside n8n's encrypted credential store and never touch the client-side code.</div>
+          </div>
+        </div>
+        <div class="design-decision">
+          <span class="dd-icon">&#128336;</span>
+          <div>
+            <div class="dd-title">Writers vs Reader — strict separation</div>
+            <div class="dd-body">WF1–5 only write. WF6 only reads. This means the dashboard never competes with a data collection run. WF6 can be activated and tested with zero data — it just returns empty arrays until WF1 has run.</div>
+          </div>
+        </div>
+        <div class="design-decision">
+          <span class="dd-icon">&#129302;</span>
+          <div>
+            <div class="dd-title">Structured prompt engineering for GPT-4o</div>
+            <div class="dd-body">WF4 sends a strictly formatted JSON payload — not raw text. GPT-4o returns structured HTML with specific insight types (win / watch / next move), making the email template fully predictable and machine-readable by WF5.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">4 / 6</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 5 — PRODUCT IN ACTION
+══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <span class="page-section-tag">04 — Product in Action</span>
+    </div>
+    <span class="page-header-logo">ReportFlow · Case Study</span>
+  </div>
+
+  <div class="page-content">
+
+    <div>
+      <div class="section-heading">Live data. <span>One dashboard.</span><br>Every client, every metric.</div>
+      <div class="section-intro">
+        Screenshots taken from the live dashboard running in demo mode — 3 mock clients with realistic
+        marketing data. In production, all numbers are pulled from real platform APIs via WF6.
+      </div>
+    </div>
+
+    <div class="screenshot-block">
+      <div class="sub-label">Dashboard — KPI overview, revenue trend, channel mix</div>
+      <img class="screenshot-img" src="frontend/screenshots/01-dashboard-overview.png" alt="ReportFlow dashboard showing KPI cards, revenue trend chart and channel mix donut" style="max-height: 260px; object-fit: cover; object-position: top;" />
+      <div class="screenshot-caption">Total Revenue $187,420 · Conversion Rate 4.8% · Ad Spend $42,180 · ROAS 4.44x — all pulled from Airtable via WF6 webhook in real time. Revenue trend and channel mix update weekly.</div>
+    </div>
+
+    <div class="screenshot-row">
+      <div class="screenshot-block">
+        <div class="sub-label">Clients — all active accounts at a glance</div>
+        <img class="screenshot-img" src="frontend/screenshots/02-clients.png" alt="Client cards showing BrightEdge Digital, NovaTech Solutions, Elevate Coaching" style="max-height: 190px; object-fit: cover; object-position: top;" />
+        <div class="screenshot-caption">Each client card shows Revenue, ROAS, and MoM change. One click switches the full dashboard to that client's data.</div>
+      </div>
+      <div class="screenshot-block">
+        <div class="sub-label">Reports — AI summary history per client</div>
+        <img class="screenshot-img" src="frontend/screenshots/03-reports.png" alt="Reports table listing weekly and monthly AI summaries with status badges" style="max-height: 190px; object-fit: cover; object-position: top;" />
+        <div class="screenshot-caption">Every AI summary is stored in Airtable and surfaced here with period dates, client, and delivery status (Sent / Draft). Full summary opens on click.</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">5 / 6</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 6 — RESULTS & TAKEAWAYS
+══════════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-left">
+      <span class="page-section-tag">05 — Results &amp; Takeaways</span>
+    </div>
+    <span class="page-header-logo">ReportFlow · Case Study</span>
+  </div>
+
+  <div class="page-content">
+
+    <div>
+      <div class="section-heading">The system runs. <span>Every Monday.</span><br>Without anyone touching it.</div>
+    </div>
+
+    <div>
+      <div class="sub-label">Measured Outcomes</div>
+      <div class="results-big">
+        <div class="result-card r1">
+          <div class="result-num">4h&#8594;5m</div>
+          <div class="result-label">Time per client report</div>
+          <div class="result-sub">From 60–90 min of manual work to a 5-minute setup per client — then fully automated every week after</div>
+        </div>
+        <div class="result-card r2">
+          <div class="result-num">5&#215;</div>
+          <div class="result-label">Platforms unified</div>
+          <div class="result-sub">GA4, Meta Ads, Google Ads, Stripe, and Mailchimp — one Airtable base, one dashboard, one weekly email</div>
+        </div>
+        <div class="result-card r3">
+          <div class="result-num">&lt;$0.02</div>
+          <div class="result-label">AI cost per report</div>
+          <div class="result-sub">GPT-4o with a structured prompt averages ~700 output tokens per summary — under 2 cents at current pricing</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sub-label">Key Takeaways</div>
+      <div class="takeaway-list">
+        <div class="takeaway-item">
+          <div class="takeaway-num">01</div>
+          <div class="takeaway-content">
+            <div class="takeaway-title">Writers vs Reader is the most important architectural decision</div>
+            <div class="takeaway-body">Separating data collection (WF1–5) from data serving (WF6) means the dashboard is always available regardless of whether a scheduled workflow is running. It also means each workflow can be debugged, rerun, or replaced in isolation — without affecting any other part of the system.</div>
+          </div>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-num">02</div>
+          <div class="takeaway-content">
+            <div class="takeaway-title">Airtable outperforms a custom database for small-scale automation</div>
+            <div class="takeaway-body">A custom database adds DevOps overhead — hosting, backups, schema migrations. Airtable gives you a queryable, human-readable data warehouse for free. When a workflow misbehaves, you can inspect every row directly in the browser. That debuggability pays for itself constantly.</div>
+          </div>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-num">03</div>
+          <div class="takeaway-content">
+            <div class="takeaway-title">Structured prompts make AI output deterministic enough to automate</div>
+            <div class="takeaway-body">WF4 sends GPT-4o a strict JSON schema and asks for output in a defined format (insight_type, title, body_html). This makes WF5 completely predictable — it never needs to parse freeform text. Structured input and output contracts are what separate an AI demo from a production system.</div>
+          </div>
+        </div>
+        <div class="takeaway-item">
+          <div class="takeaway-num">04</div>
+          <div class="takeaway-content">
+            <div class="takeaway-title">No-server frontends compound the value of automation backends</div>
+            <div class="takeaway-body">The dashboard is a single HTML file — no Next.js server, no deployment pipeline, no maintenance. It runs in any browser, falls back to mock data when offline, and can be handed to a client who opens it by double-clicking. The automation handles the hard part; the frontend just needs to get out of the way.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-box">
+      <div>
+        <div class="cta-text-title">Want a reporting system like this?</div>
+        <div class="cta-text-sub">I build AI automation systems that connect your existing tools and replace manual work permanently.<br>n8n · Airtable · Claude / GPT-4o · Custom dashboards · Full handoff with documentation.</div>
+      </div>
+      <div class="cta-contact">
+        <span class="cta-contact-item">youraimates@gmail.com</span>
+        <span class="cta-contact-item">linkedin.com/in/johyandi-lukmana-932073337</span>
+        <span class="cta-contact-item">upwork.com/freelancers/~01d1a59155f46bc949</span>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">6 / 6</div>
+</div>
+
+
+</body>
+</html>

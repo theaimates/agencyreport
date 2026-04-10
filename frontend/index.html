@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ═══ PRIMARY SEO ═══ -->
+<title>ReportFlow by AImates — AI-Powered Agency Reporting & Workflow Automation</title>
+<meta name="title" content="ReportFlow by AImates — AI-Powered Agency Reporting & Workflow Automation">
+<meta name="description" content="ReportFlow is an agentic reporting system built by AImates. Automate client reports, track campaign performance, and run your agency on AI-powered workflows — built with Claude Code, n8n, and Airtable.">
+<meta name="keywords" content="AI automation, workflow automation, workflow builder, agentic workflows, agency reporting, AI reporting dashboard, Claude Code, n8n automation, Airtable automation, AI systems builder, system building, AI agency tools, automated reporting, workflow orchestration, AI content engine, business automation, no-code automation, AImates">
+<meta name="author" content="AImates">
+<meta name="robots" content="index, follow">
+<meta name="language" content="English">
+<link rel="canonical" href="https://theaimates.com/">
+
+<!-- ═══ OPEN GRAPH (Facebook, LinkedIn, WhatsApp) ═══ -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theaimates.com/">
+<meta property="og:site_name" content="AImates">
+<meta property="og:title" content="ReportFlow by AImates — AI-Powered Agency Reporting">
+<meta property="og:description" content="Automate your agency reporting with ReportFlow — an agentic dashboard built on Claude Code, n8n, and Airtable. Stop pulling reports manually. Let AI run your operations.">
+<meta property="og:image" content="https://theaimates.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ReportFlow — AI Agency Reporting Dashboard by AImates">
+<meta property="og:locale" content="en_US">
+
+<!-- ═══ STRUCTURED DATA — JSON-LD (AIO / GEO) ═══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ReportFlow",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": "https://theaimates.com/",
+  "description": "An AI-powered agency reporting dashboard built with Claude Code, n8n, and Airtable. Automates client report generation, campaign performance tracking, and workflow orchestration.",
+  "creator": {
+    "@type": "Organization",
+    "name": "AImates",
+    "url": "https://theaimates.com",
+    "description": "AImates builds custom AI automation systems, agentic workflows, and AI-powered business tools using Claude, n8n, and Airtable.",
+    "sameAs": ["https://theaimates.com"]
+  },
+  "keywords": "AI automation, workflow automation, workflow builder, agentic workflows, Claude Code, n8n, Airtable, agency reporting, AI systems",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
+<!-- ═══ FONTS & STYLES ═══ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Source+Serif+4:ital,wght@0,300;0,400;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Mobile Toggle -->
+<button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+</button>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">R</div>
+    <span class="logo-text">ReportFlow</span>
+  </div>
+  <nav class="nav-section">
+    <button class="nav-item active" data-section="overview">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" data-section="clients">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Clients
+    </button>
+    <button class="nav-item" data-section="reports">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Reports
+    </button>
+    <button class="nav-item" data-section="settings">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      Settings
+    </button>
+  </nav>
+  <div class="integrations">
+    <div class="integrations-title">Connected</div>
+    <div class="integration-item"><span class="status-dot"></span> Google Analytics</div>
+    <div class="integration-item"><span class="status-dot"></span> Meta Business</div>
+    <div class="integration-item"><span class="status-dot"></span> Stripe</div>
+    <div class="integration-item"><span class="status-dot"></span> Mailchimp</div>
+  </div>
+</aside>
+
+<!-- ═══ TOPBAR ═══ -->
+<header class="topbar">
+  <div class="client-selector" id="clientSelector">
+    <div class="client-avatar" id="clientAvatar" style="background:linear-gradient(135deg,#6366f1,#a855f7)">BE</div>
+    <div class="client-info">
+      <h2 id="clientName">BrightEdge Digital</h2>
+      <span id="clientMeta">E-commerce &middot; 14 campaigns active</span>
+    </div>
+    <svg class="chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    <div class="client-dropdown" id="clientDropdown"></div>
+  </div>
+  <div class="topbar-actions">
+    <div class="date-badge" id="dateBadge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span id="dateLabel">Mar 1 – Mar 31, 2026</span>
+    </div>
+    <div class="date-dropdown" id="dateDropdown"></div>
+    <button class="btn-export" id="exportBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Export PDF
+    </button>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div class="content" id="dashboardContent">
+    <!-- All dashboard content rendered by JS -->
+  </div>
+</main>
+
+<!-- ═══ MODAL ═══ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <span id="modalTitle" style="font-family:'Syne',sans-serif;font-weight:600">Campaign Details</span>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ═══ LOADING OVERLAY ═══ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- ═══ ERROR TOAST ═══ -->
+<div class="error-toast" id="errorToast">
+  <strong>Demo mode</strong>
+  Connect n8n in Settings to load live data.
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+// ══════════════════════════════════════════
+// MOCK DATA  (portfolio / offline fallback)
+// When n8n is unreachable, the dashboard renders this data.
+// In live mode this is replaced by data from Airtable via n8n.
+// ══════════════════════════════════════════
+
+const MOCK_CLIENTS = [
+  {
+    id:'brightedge', name:'BrightEdge Digital', initials:'BE',
+    gradient:'linear-gradient(135deg,#6366f1,#a855f7)',
+    niche:'E-commerce', activeCampaigns:14,
+    kpis:{ revenue:187420, revenueChange:32.1, convRate:4.8, convChange:1.2, adSpend:42180, spendChange:-8.4, roas:4.44, roasChange:0.92 },
+    revenue:[
+      {week:'Wk 1',value:28400,prev:24200},{week:'Wk 2',value:35200,prev:28100},
+      {week:'Wk 3',value:48600,prev:38500},{week:'Wk 4',value:52100,prev:41800},
+      {week:'Wk 5',value:23120,prev:29240}
+    ],
+    channels:[
+      {name:'Meta Ads',pct:42,value:78716,color:'#d4a843'},
+      {name:'Google Ads',pct:28,value:52478,color:'#6366f1'},
+      {name:'Email',pct:18,value:33736,color:'#3ecf8e'},
+      {name:'Organic',pct:12,value:22490,color:'#a855f7'}
+    ],
+    performance:[
+      {name:'Meta Ads',roas:5.2,spend:15140,revenue:78716,conv:5.6,barWidth:'87%',gradient:'linear-gradient(90deg,#d4a843,#e8c547)'},
+      {name:'Google Ads',roas:3.8,spend:13810,revenue:52478,conv:4.2,barWidth:'63%',gradient:'linear-gradient(90deg,#6366f1,#818cf8)'},
+      {name:'Email',roas:28.1,spend:1200,revenue:33736,conv:8.1,barWidth:'56%',gradient:'linear-gradient(90deg,#3ecf8e,#6ee7a8)'},
+      {name:'Organic',roas:Infinity,spend:0,revenue:22490,conv:3.4,barWidth:'37%',gradient:'linear-gradient(90deg,#a855f7,#c084fc)'}
+    ],
+    campaigns:[
+      {name:'Spring Collection Launch',platform:'meta',spend:8420,revenue:52180,roas:6.20,status:'active',impressions:245000,clicks:12800,ctr:5.2,cpc:0.66},
+      {name:'Brand Awareness Q1',platform:'meta',spend:4200,revenue:18900,roas:4.50,status:'active',impressions:890000,clicks:8900,ctr:1.0,cpc:0.47},
+      {name:'Shopping Ads — Bestsellers',platform:'google',spend:6100,revenue:28670,roas:4.70,status:'active',impressions:180000,clicks:9200,ctr:5.1,cpc:0.66},
+      {name:'Retargeting — Cart Abandon',platform:'meta',spend:2520,revenue:7636,roas:3.03,status:'active',impressions:45000,clicks:3200,ctr:7.1,cpc:0.79},
+      {name:'Search — Branded Terms',platform:'google',spend:3200,revenue:12480,roas:3.90,status:'active',impressions:62000,clicks:4100,ctr:6.6,cpc:0.78},
+      {name:'Weekly Newsletter',platform:'email',spend:400,revenue:18200,roas:45.5,status:'active',impressions:28000,clicks:4200,ctr:15.0,cpc:0.10},
+      {name:'Search — Generic Keywords',platform:'google',spend:4510,revenue:11328,roas:2.51,status:'paused',impressions:220000,clicks:6800,ctr:3.1,cpc:0.66},
+      {name:'Win-Back Series',platform:'email',spend:800,revenue:15536,roas:19.4,status:'active',impressions:15000,clicks:2800,ctr:18.7,cpc:0.29}
+    ],
+    summary:{
+      body:`<p>March was a <strong>breakout month</strong> for BrightEdge Digital. Revenue hit <span class="hl">$187,420</span> — a <strong>32.1% increase</strong> over February — while ad spend actually <strong>decreased 8.4%</strong>, pushing ROAS from 3.52x to 4.44x.</p><p>The <strong>Spring Collection Launch</strong> on Meta was the standout campaign, generating $52,180 on just $8,420 in spend (6.20x ROAS). Email continues to punch well above its weight: the <strong>Weekly Newsletter</strong> alone drove $18,200 at a 45.5x return.</p><p>One area to watch: <strong>Google Generic Keywords</strong> was paused mid-month after ROAS dipped below 2.5x. Recommend reallocating that $4,510 budget to the Shopping Ads campaign, which is converting at 4.70x with room to scale.</p>`,
+      insights:[
+        {type:'win',title:'Biggest Win',text:'Spring Collection Launch drove 28% of total revenue on 20% of ad spend.'},
+        {type:'watch',title:'Watch Closely',text:'Google Generic Keywords paused — $4,510 budget needs reallocation.'},
+        {type:'next',title:'Next Move',text:'Scale Shopping Ads budget by 40% and test new email segments.'}
+      ]
+    }
+  },
+  {
+    id:'nova', name:'NovaTech Solutions', initials:'NT',
+    gradient:'linear-gradient(135deg,#3ecf8e,#0ea5e9)',
+    niche:'SaaS', activeCampaigns:9,
+    kpis:{ revenue:94200, revenueChange:18.5, convRate:3.2, convChange:0.4, adSpend:28400, spendChange:-5.1, roas:3.32, roasChange:0.48 },
+    revenue:[
+      {week:'Wk 1',value:16800,prev:14200},{week:'Wk 2',value:19200,prev:16800},
+      {week:'Wk 3',value:24100,prev:20500},{week:'Wk 4',value:22800,prev:19200},
+      {week:'Wk 5',value:11300,prev:8580}
+    ],
+    channels:[
+      {name:'Google Ads',pct:48,value:45216,color:'#6366f1'},
+      {name:'LinkedIn',pct:26,value:24492,color:'#3ecf8e'},
+      {name:'Content/SEO',pct:16,value:15072,color:'#d4a843'},
+      {name:'Email',pct:10,value:9420,color:'#a855f7'}
+    ],
+    performance:[
+      {name:'Google Ads',roas:3.8,spend:11900,revenue:45216,conv:3.8,barWidth:'82%',gradient:'linear-gradient(90deg,#6366f1,#818cf8)'},
+      {name:'LinkedIn',roas:2.6,spend:9420,revenue:24492,conv:2.1,barWidth:'53%',gradient:'linear-gradient(90deg,#3ecf8e,#6ee7a8)'},
+      {name:'Content/SEO',roas:Infinity,spend:2100,revenue:15072,conv:4.5,barWidth:'33%',gradient:'linear-gradient(90deg,#d4a843,#e8c547)'},
+      {name:'Email',roas:15.7,spend:600,revenue:9420,conv:6.2,barWidth:'20%',gradient:'linear-gradient(90deg,#a855f7,#c084fc)'}
+    ],
+    campaigns:[
+      {name:'SaaS Demo Campaign',platform:'google',spend:5200,revenue:22400,roas:4.31,status:'active',impressions:142000,clicks:5600,ctr:3.9,cpc:0.93},
+      {name:'LinkedIn Thought Leadership',platform:'meta',spend:4800,revenue:14400,roas:3.00,status:'active',impressions:320000,clicks:3200,ctr:1.0,cpc:1.50},
+      {name:'Free Trial Retargeting',platform:'google',spend:3200,revenue:12800,roas:4.00,status:'active',impressions:38000,clicks:2800,ctr:7.4,cpc:1.14},
+      {name:'Onboarding Drip',platform:'email',spend:200,revenue:5200,roas:26.0,status:'active',impressions:8500,clicks:1700,ctr:20.0,cpc:0.12},
+      {name:'LinkedIn Lead Gen',platform:'meta',spend:4620,revenue:10092,roas:2.18,status:'active',impressions:280000,clicks:2800,ctr:1.0,cpc:1.65},
+      {name:'Search — Competitor Terms',platform:'google',spend:3500,revenue:10016,roas:2.86,status:'paused',impressions:95000,clicks:3200,ctr:3.4,cpc:1.09},
+      {name:'Blog SEO Traffic',platform:'google',spend:2100,revenue:15072,roas:7.18,status:'active',impressions:520000,clicks:18200,ctr:3.5,cpc:0.12},
+      {name:'Churn Prevention',platform:'email',spend:400,revenue:4220,roas:10.55,status:'active',impressions:5200,clicks:980,ctr:18.8,cpc:0.41},
+      {name:'Product Hunt Launch',platform:'meta',spend:2800,revenue:8200,roas:2.93,status:'active',impressions:450000,clicks:6800,ctr:1.5,cpc:0.41}
+    ],
+    summary:{
+      body:`<p>NovaTech had a <strong>solid March</strong> with <span class="hl">$94,200</span> in revenue — up <strong>18.5%</strong> month-over-month. Google Ads remains the primary driver at 48% of revenue, with the <strong>SaaS Demo Campaign</strong> delivering 4.31x ROAS.</p><p>The <strong>Blog SEO</strong> channel is quietly becoming a powerhouse — generating $15,072 in revenue on just $2,100 in content investment (7.18x ROAS). LinkedIn is performing adequately but the <strong>cost per click ($1.50+)</strong> needs attention.</p><p>Recommendation: <strong>Double down on content marketing</strong> and reduce LinkedIn spend by 30%, reallocating to Google retargeting where conversion rates are highest.</p>`,
+      insights:[
+        {type:'win',title:'Biggest Win',text:'Blog SEO generated $15k on $2.1k spend — 7.18x ROAS with compounding value.'},
+        {type:'watch',title:'Watch Closely',text:'LinkedIn CPC at $1.50+ is above industry average. Needs creative refresh.'},
+        {type:'next',title:'Next Move',text:'Scale content budget 2x and test LinkedIn video ads to lower CPC.'}
+      ]
+    }
+  },
+  {
+    id:'elevate', name:'Elevate Coaching', initials:'EC',
+    gradient:'linear-gradient(135deg,#f59e0b,#ef4444)',
+    niche:'Coaching & Courses', activeCampaigns:6,
+    kpis:{ revenue:52800, revenueChange:44.2, convRate:6.1, convChange:2.3, adSpend:12600, spendChange:12.0, roas:4.19, roasChange:0.68 },
+    revenue:[
+      {week:'Wk 1',value:8200,prev:5800},{week:'Wk 2',value:11400,prev:7200},
+      {week:'Wk 3',value:14800,prev:9600},{week:'Wk 4',value:12600,prev:10200},
+      {week:'Wk 5',value:5800,prev:3890}
+    ],
+    channels:[
+      {name:'Instagram Ads',pct:38,value:20064,color:'#f59e0b'},
+      {name:'YouTube',pct:28,value:14784,color:'#ef4444'},
+      {name:'Email Funnels',pct:22,value:11616,color:'#3ecf8e'},
+      {name:'Referral',pct:12,value:6336,color:'#6366f1'}
+    ],
+    performance:[
+      {name:'Instagram Ads',roas:4.8,spend:4180,revenue:20064,conv:7.2,barWidth:'78%',gradient:'linear-gradient(90deg,#f59e0b,#fbbf24)'},
+      {name:'YouTube',roas:3.4,spend:4350,revenue:14784,conv:4.8,barWidth:'58%',gradient:'linear-gradient(90deg,#ef4444,#f87171)'},
+      {name:'Email Funnels',roas:19.4,spend:600,revenue:11616,conv:9.8,barWidth:'45%',gradient:'linear-gradient(90deg,#3ecf8e,#6ee7a8)'},
+      {name:'Referral',roas:Infinity,spend:0,revenue:6336,conv:12.4,barWidth:'25%',gradient:'linear-gradient(90deg,#6366f1,#818cf8)'}
+    ],
+    campaigns:[
+      {name:'Instagram Reels — Testimonial',platform:'meta',spend:2400,revenue:12800,roas:5.33,status:'active',impressions:680000,clicks:14200,ctr:2.1,cpc:0.17},
+      {name:'YouTube Pre-Roll',platform:'google',spend:2800,revenue:10200,roas:3.64,status:'active',impressions:920000,clicks:9200,ctr:1.0,cpc:0.30},
+      {name:'Webinar Funnel',platform:'email',spend:200,revenue:6800,roas:34.0,status:'active',impressions:12000,clicks:3600,ctr:30.0,cpc:0.06},
+      {name:'Instagram Story Ads',platform:'meta',spend:1780,revenue:7264,roas:4.08,status:'active',impressions:420000,clicks:8400,ctr:2.0,cpc:0.21},
+      {name:'YouTube Retargeting',platform:'google',spend:1550,revenue:4584,roas:2.96,status:'active',impressions:180000,clicks:5400,ctr:3.0,cpc:0.29},
+      {name:'Nurture Sequence',platform:'email',spend:400,revenue:4816,roas:12.04,status:'active',impressions:6800,clicks:1360,ctr:20.0,cpc:0.29}
+    ],
+    summary:{
+      body:`<p>Elevate Coaching had its <strong>best month ever</strong> — <span class="hl">$52,800</span> in revenue, a <strong>44.2% jump</strong> from February. The Instagram Reels testimonial campaign was the star, driving $12,800 on just $2,400 in spend.</p><p>The <strong>Webinar Funnel</strong> email campaign delivered an exceptional 34x ROAS, proving that the high-touch coaching model thrives on email automation. YouTube is solid but the <strong>pre-roll format</strong> shows diminishing returns — consider shifting to long-form sponsorships.</p><p>Key insight: <strong>Referral revenue ($6,336) came at zero ad cost.</strong> Building a formal referral program could unlock significant growth.</p>`,
+      insights:[
+        {type:'win',title:'Biggest Win',text:'Webinar funnel hit 34x ROAS — email automation is this business\'s superpower.'},
+        {type:'watch',title:'Watch Closely',text:'YouTube pre-roll CTR is declining. Creative fatigue setting in.'},
+        {type:'next',title:'Next Move',text:'Launch a formal referral program and double the webinar funnel frequency.'}
+      ]
+    }
+  }
+];
+
+// ── Mock report history (used when n8n not connected) ──
+// In live mode, the Reports section would query the AI Summaries Airtable table directly.
+const MOCK_REPORTS = [
+  { id:'r1', clientId:'brightedge', clientName:'BrightEdge Digital', initials:'BE',
+    gradient:'linear-gradient(135deg,#6366f1,#a855f7)',
+    period:'Mar 24–30, 2026', type:'Weekly AI', status:'sent',
+    generatedAt:'Mar 31, 2026', summary: MOCK_CLIENTS[0].summary },
+  { id:'r2', clientId:'nova', clientName:'NovaTech Solutions', initials:'NT',
+    gradient:'linear-gradient(135deg,#3ecf8e,#0ea5e9)',
+    period:'Mar 24–30, 2026', type:'Weekly AI', status:'sent',
+    generatedAt:'Mar 31, 2026', summary: MOCK_CLIENTS[1].summary },
+  { id:'r3', clientId:'elevate', clientName:'Elevate Coaching', initials:'EC',
+    gradient:'linear-gradient(135deg,#f59e0b,#ef4444)',
+    period:'Mar 24–30, 2026', type:'Weekly AI', status:'draft',
+    generatedAt:'Mar 31, 2026', summary: MOCK_CLIENTS[2].summary },
+  { id:'r4', clientId:'brightedge', clientName:'BrightEdge Digital', initials:'BE',
+    gradient:'linear-gradient(135deg,#6366f1,#a855f7)',
+    period:'Mar 17–23, 2026', type:'Weekly AI', status:'sent',
+    generatedAt:'Mar 24, 2026',
+    summary:{ body:`<p>A solid mid-month week for BrightEdge Digital. Revenue reached <span class="hl">$47,200</span> with Meta campaigns leading at 5.1x ROAS. The Spring Collection creative continues to perform well, while Google Shopping saw a slight CTR dip worth monitoring.</p>`,
+      insights:[
+        {type:'win',title:'Biggest Win',text:'Meta Spring Collection maintained 5.1x ROAS through the full week.'},
+        {type:'watch',title:'Watch Closely',text:'Google Shopping CTR dropped 0.4% — may need fresh ad creative.'},
+        {type:'next',title:'Next Move',text:'Test a lookalike audience on Meta based on top 5% purchasers.'}
+      ]}},
+  { id:'r5', clientId:'nova', clientName:'NovaTech Solutions', initials:'NT',
+    gradient:'linear-gradient(135deg,#3ecf8e,#0ea5e9)',
+    period:'Mar 17–23, 2026', type:'Weekly AI', status:'sent',
+    generatedAt:'Mar 24, 2026',
+    summary:{ body:`<p>NovaTech closed the week at <span class="hl">$22,800</span>. SaaS Demo Campaign continues to be the primary revenue driver. Blog SEO traffic grew 12% week-over-week, reinforcing the content strategy.</p>`,
+      insights:[
+        {type:'win',title:'Biggest Win',text:'Blog SEO traffic +12% WoW — organic compound growth taking hold.'},
+        {type:'watch',title:'Watch Closely',text:'LinkedIn lead quality dropped slightly. Review targeting parameters.'},
+        {type:'next',title:'Next Move',text:'Publish two more long-form SEO articles targeting high-intent keywords.'}
+      ]}},
+  { id:'r6', clientId:'brightedge', clientName:'BrightEdge Digital', initials:'BE',
+    gradient:'linear-gradient(135deg,#6366f1,#a855f7)',
+    period:'March 2026', type:'Monthly AI', status:'sent',
+    generatedAt:'Apr 1, 2026', summary: MOCK_CLIENTS[0].summary },
+];
+
+const DATE_RANGES = [
+  {id:'this_month',label:'This Month',value:'Mar 1 – Mar 31, 2026'},
+  {id:'last_month',label:'Last Month',value:'Feb 1 – Feb 28, 2026'},
+  {id:'q1',label:'Q1 2026',value:'Jan 1 – Mar 31, 2026'},
+  {id:'last_90',label:'Last 90 Days',value:'Jan 2 – Mar 31, 2026'},
+  {id:'ytd',label:'Year to Date',value:'Jan 1 – Mar 31, 2026'}
+];
+
+const NAV_SECTIONS = {
+  overview: 'Dashboard',
+  clients:  'Client Management',
+  reports:  'Reports',
+  settings: 'Settings & Integrations'
+};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+
+let state = {
+  activeClient: 0,
+  activeSection: 'overview',
+  activeDateRange: 0,
+  platformFilter: 'all',
+  reportClientFilter: null,
+  sortColumn: null,
+  sortDirection: 'default',
+  searchQuery: '',
+  clientDropdownOpen: false,
+  dateDropdownOpen: false,
+  // Live data — null = use mock data, object = use live data
+  liveClients: null,
+  liveClientData: null,
+};
+
+// Restore from localStorage
+try {
+  const saved = localStorage.getItem('reportflow_state');
+  if (saved) {
+    const s = JSON.parse(saved);
+    state.activeClient = s.activeClient ?? 0;
+    state.activeSection = s.activeSection ?? 'overview';
+    state.activeDateRange = s.activeDateRange ?? 0;
+    state.platformFilter = s.platformFilter ?? 'all';
+    state.reportClientFilter = s.reportClientFilter ?? null;
+  }
+} catch(e) {}
+
+function saveState() {
+  try {
+    localStorage.setItem('reportflow_state', JSON.stringify({
+      activeClient: state.activeClient,
+      activeSection: state.activeSection,
+      activeDateRange: state.activeDateRange,
+      platformFilter: state.platformFilter,
+      reportClientFilter: state.reportClientFilter
+    }));
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════
+
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+function fmt(n) {
+  return '$' + (n >= 1000 ? n.toLocaleString('en-US') : n);
+}
+
+function fmtK(n) {
+  return n >= 1000 ? '$' + (n/1000).toFixed(0) + 'k' : '$' + n;
+}
+
+function roasClass(r) {
+  if (r >= 4) return 'roas-good';
+  if (r >= 2.5) return 'roas-ok';
+  return 'roas-low';
+}
+
+function platformLabel(p) {
+  const labels = {meta:'Meta',google:'Google',email:'Email'};
+  return labels[p] || p;
+}
+
+// Returns active clients list (live or mock)
+function getActiveClients() {
+  return state.liveClients || MOCK_CLIENTS;
+}
+
+// Returns current client data (live or mock)
+function getClient() {
+  if (state.liveClientData) return state.liveClientData;
+  const clients = getActiveClients();
+  return clients[Math.min(state.activeClient, clients.length - 1)];
+}
+
+// Returns full report history (live or mock)
+function getReportsList() {
+  // In live mode, this would come from a dedicated WF6 reports endpoint.
+  // For now, always return the mock history.
+  return MOCK_REPORTS;
+}
+
+// ══════════════════════════════════════════
+// LOADING & ERROR UI
+// ══════════════════════════════════════════
+
+function showLoading() {
+  $('#loadingOverlay').classList.add('visible');
+}
+
+function hideLoading() {
+  $('#loadingOverlay').classList.remove('visible');
+}
+
+function showErrorToast(msg) {
+  const toast = $('#errorToast');
+  if (msg) toast.querySelector('strong').nextSibling.textContent = '\n' + msg;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 4000);
+}
+
+// ══════════════════════════════════════════
+// LIVE DATA LOADING
+// ══════════════════════════════════════════
+
+async function loadDashboard() {
+  const clients = getActiveClients();
+  const clientId = clients[state.activeClient]?.id;
+  const dateRangeId = DATE_RANGES[state.activeDateRange].id;
+
+  if (!clientId) return;
+
+  showLoading();
+  const data = await ReportAPI.fetchDashboard(clientId, dateRangeId);
+  hideLoading();
+
+  if (data) {
+    state.liveClientData = data;
+    updateClientUI();
+  } else {
+    state.liveClientData = null;
+    if (!CONFIG.isOfflineMode()) showErrorToast('Demo mode — connect n8n in Settings to load live data.');
+  }
+
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+
+function renderDashboard() {
+  const c = getClient();
+  const content = $('#dashboardContent');
+  const routes = {
+    overview: () => renderOverview(c, content),
+    clients:  () => renderClientsSection(content),
+    reports:  () => renderReportsSection(content),
+    settings: () => renderSettingsSection(content),
+  };
+  (routes[state.activeSection] || routes.overview)();
+}
+
+function renderOverview(c, content) {
+  // ── KPIs ──
+  const k = c.kpis;
+  content.innerHTML = `
+    <div class="section-header">
+      <span class="section-title">Key Metrics</span>
+      <span class="section-badge">vs. Previous Period</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-value" data-count="${k.revenue}" data-prefix="$">$0</div>
+        <div class="kpi-meta">
+          <span class="kpi-change ${k.revenueChange>=0?'positive':'negative'}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${k.revenueChange>=0?'<path d="M7 17l5-5 5 5M7 7l5 5 5-5"/>':'<path d="M17 7l-5 5-5-5M17 17l-5-5-5 5"/>'}</svg>
+            ${k.revenueChange>=0?'+':''}${k.revenueChange}%
+          </span>
+          <span class="kpi-context">${k.revenueChange>=0?'+':''}${fmt(Math.round(k.revenue * k.revenueChange / 100))}</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Conversion Rate</div>
+        <div class="kpi-value" data-count="${k.convRate}" data-suffix="%" data-decimals="1">0%</div>
+        <div class="kpi-meta">
+          <span class="kpi-change ${k.convChange>=0?'positive':'negative'}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${k.convChange>=0?'<path d="M5 12h14M12 5l7 7-7 7"/>':'<path d="M19 12H5M12 19l-7-7 7-7"/>'}</svg>
+            ${k.convChange>=0?'+':''}${k.convChange}%
+          </span>
+          <span class="kpi-context">from ${(k.convRate - k.convChange).toFixed(1)}%</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ad Spend</div>
+        <div class="kpi-value" data-count="${k.adSpend}" data-prefix="$">$0</div>
+        <div class="kpi-meta">
+          <span class="kpi-change ${k.spendChange<=0?'positive':'negative'}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${k.spendChange<=0?'<path d="M19 12H5M12 19l-7-7 7-7"/>':'<path d="M5 12h14M12 5l7 7-7 7"/>'}</svg>
+            ${k.spendChange>=0?'+':''}${k.spendChange}%
+          </span>
+          <span class="kpi-context">${k.spendChange<=0?'':'+'}${fmt(Math.round(Math.abs(k.adSpend * k.spendChange / 100)))} ${k.spendChange<=0?'saved':'added'}</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">ROAS</div>
+        <div class="kpi-value" data-count="${k.roas}" data-suffix="x" data-decimals="2">0x</div>
+        <div class="kpi-meta">
+          <span class="kpi-change ${k.roasChange>=0?'positive':'negative'}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${k.roasChange>=0?'<path d="M5 12h14M12 5l7 7-7 7"/>':'<path d="M19 12H5M12 19l-7-7 7-7"/>'}</svg>
+            ${k.roasChange>=0?'+':''}${k.roasChange}x
+          </span>
+          <span class="kpi-context">from ${(k.roas - k.roasChange).toFixed(2)}x</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="section-header" style="margin-bottom:6px">
+          <span class="section-title">Revenue Trend</span>
+          <span class="section-badge">Weekly</span>
+        </div>
+        <div class="revenue-chart" id="revenueChart"></div>
+      </div>
+      <div class="chart-card">
+        <div class="section-header" style="margin-bottom:6px">
+          <span class="section-title">Channel Mix</span>
+          <span class="section-badge">By Revenue</span>
+        </div>
+        <div class="channel-donut-wrap" id="donutChart"></div>
+      </div>
+    </div>
+
+    <!-- Performance -->
+    <div class="performance-section">
+      <div class="section-header">
+        <span class="section-title">Channel Performance</span>
+        <span class="section-badge">Current Period</span>
+      </div>
+      <div class="perf-grid" id="perfGrid"></div>
+    </div>
+
+    <!-- Campaign Table -->
+    <div class="table-section">
+      <div class="section-header">
+        <span class="section-title">Top Campaigns</span>
+        <div class="table-controls">
+          <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="search-input" type="text" placeholder="Search campaigns..." id="searchInput" value="${state.searchQuery}">
+          </div>
+          <span class="section-badge" id="campaignCount"></span>
+        </div>
+      </div>
+      <div class="table-card" id="tableCard"></div>
+    </div>
+
+    <!-- AI Summary -->
+    <div class="summary-section">
+      <div class="section-header">
+        <span class="section-title">AI Analysis</span>
+        <span class="section-badge">${c._isLive ? 'Live · Auto-generated' : 'Demo data'}</span>
+      </div>
+      <div class="summary-card" id="summaryCard"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dashboard-footer">
+      <div class="footer-brand">
+        <span class="footer-dot"></span>
+        ReportFlow
+      </div>
+      <span id="live-clock"></span>
+      <span class="footer-credit">Built by <a href="https://theaimates.com" target="_blank" rel="noopener noreferrer">AImates</a></span>
+    </div>
+  `;
+
+  renderRevenueChart(c);
+  renderDonutChart(c);
+  renderPerfGrid(c);
+  renderCampaignTable(c);
+  renderSummary(c);
+  animateCounters();
+  startClock();
+  bindEvents();
+}
+
+// ══════════════════════════════════════════
+// SECTION: REPORTS (history table)
+// ══════════════════════════════════════════
+
+function renderReportsSection(content) {
+  const allReports = getReportsList();
+  const clients = getActiveClients();
+
+  // Build client filter tabs — 'all' + one per client
+  const clientFilters = [
+    { id: 'all', label: 'All Clients' },
+    ...clients.map(cl => ({ id: cl.id, label: cl.initials }))
+  ];
+
+  const active = state.reportClientFilter || 'all';
+  const filtered = active === 'all'
+    ? allReports
+    : allReports.filter(r => r.clientId === active);
+
+  content.innerHTML = `
+    <div style="opacity:0;animation:fadeUp .4s ease forwards">
+      <div class="section-header">
+        <span class="section-title">Reports</span>
+        <span class="section-badge">${filtered.length} report${filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="filter-tabs" style="margin-bottom:20px">
+        ${clientFilters.map(f => `
+          <button class="filter-tab ${active === f.id ? 'active' : ''}" data-filter="${f.id}">
+            ${f.label}
+          </button>`).join('')}
+      </div>
+      <div class="table-card">
+        ${filtered.length === 0 ? `<div class="no-results">No reports found</div>` : `
+        <table class="campaign-table">
+          <thead><tr>
+            <th>Period</th>
+            <th>Client</th>
+            <th>Type</th>
+            <th>Generated</th>
+            <th>Status</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            ${filtered.map(r => `
+              <tr>
+                <td class="campaign-name">${r.period}</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="width:24px;height:24px;border-radius:6px;background:${r.gradient};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">${r.initials}</div>
+                    ${r.clientName}
+                  </div>
+                </td>
+                <td><span class="platform-tag" style="background:var(--accent-dim);color:var(--accent);border:none">${r.type}</span></td>
+                <td style="color:var(--text-muted);font-size:12px">${r.generatedAt}</td>
+                <td><span class="status-badge ${r.status}">${r.status === 'sent' ? '✓ Sent' : '⏳ Draft'}</span></td>
+                <td>
+                  <button class="btn-view-report" data-id="${r.id}">View →</button>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`}
+      </div>
+    </div>`;
+
+  // Client filter tabs
+  content.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.reportClientFilter = btn.dataset.filter === 'all' ? null : btn.dataset.filter;
+      saveState();
+      renderReportsSection(content);
+    });
+  });
+
+  // View report buttons
+  content.querySelectorAll('.btn-view-report').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const report = allReports.find(r => r.id === btn.dataset.id);
+      if (report) openReportModal(report);
+    });
+  });
+}
+
+function openReportModal(report) {
+  $('#modalTitle').innerHTML = `
+    <span>${report.clientName}</span>
+    <span style="color:var(--text-muted);font-weight:400;font-size:13px;margin-left:10px">${report.period}</span>`;
+
+  const s = report.summary;
+  $('#modalBody').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <span class="platform-tag" style="background:var(--accent-dim);color:var(--accent);border:none">${report.type}</span>
+      <span class="status-badge ${report.status}">${report.status === 'sent' ? '✓ Sent' : '⏳ Draft'}</span>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:auto">Generated ${report.generatedAt}</span>
+    </div>
+    <div class="summary-body" style="margin-bottom:20px">${s.body}</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${s.insights.map(ins => `
+        <div class="insight-item">
+          <div class="insight-icon ${ins.type}">${ins.type==='win'?'🏆':ins.type==='watch'?'⚠️':'🚀'}</div>
+          <div class="insight-text"><strong>${ins.title}</strong> ${ins.text}</div>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+      <button class="btn-print" onclick="window.print()" style="font-size:12px;padding:8px 16px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
+    </div>`;
+
+  $('#modalOverlay').classList.add('visible');
+}
+
+// ══════════════════════════════════════════
+// SECTION: CLIENTS
+// ══════════════════════════════════════════
+
+function renderClientsSection(content) {
+  const clients = getActiveClients();
+  content.innerHTML = `
+    <div style="opacity:0;animation:fadeUp .4s ease forwards">
+      <div class="section-header">
+        <span class="section-title">Clients</span>
+        <span class="section-badge">${clients.length} active</span>
+      </div>
+      <div class="clients-grid">
+        ${clients.map((cl, i) => `
+          <div class="client-card ${i === state.activeClient ? 'active-client' : ''}">
+            <div class="client-card-header">
+              <div class="client-card-avatar" style="background:${cl.gradient}">${cl.initials}</div>
+              <div>
+                <div class="client-card-name">${cl.name}</div>
+                <div class="client-card-niche">${cl.niche} · ${cl.activeCampaigns} campaigns</div>
+              </div>
+            </div>
+            <div class="client-card-stats">
+              <div>
+                <div class="client-stat-label">Revenue</div>
+                <div class="client-stat-value">${fmtK(cl.kpis.revenue)}</div>
+              </div>
+              <div>
+                <div class="client-stat-label">ROAS</div>
+                <div class="client-stat-value">${cl.kpis.roas}x</div>
+              </div>
+              <div>
+                <div class="client-stat-label">MoM</div>
+                <div class="client-stat-value" style="color:${cl.kpis.revenueChange>=0?'var(--green)':'var(--red)'}">${cl.kpis.revenueChange>=0?'+':''}${cl.kpis.revenueChange}%</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-view-client" data-index="${i}" data-action="dashboard" style="flex:1">
+                ${i === state.activeClient ? '▦ Viewing' : '→ Dashboard'}
+              </button>
+              <button class="btn-view-client" data-index="${i}" data-action="reports" style="flex:1;background:transparent;color:var(--text-muted);border-color:var(--border)">
+                📋 Reports
+              </button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  content.querySelectorAll('.btn-view-client').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index);
+      const action = btn.dataset.action;
+      const targetSection = action === 'reports' ? 'reports' : 'overview';
+
+      state.activeClient = idx;
+      state.activeSection = targetSection;
+      state.liveClientData = null;
+      state.sortColumn = null;
+      state.sortDirection = 'default';
+      state.searchQuery = '';
+
+      if (action === 'reports') {
+        state.reportClientFilter = getActiveClients()[idx].id;
+      }
+
+      $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.section === targetSection));
+      updateClientUI();
+      saveState();
+      if (targetSection === 'overview') loadDashboard();
+      else renderDashboard();
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// SECTION: SETTINGS
+// ══════════════════════════════════════════
+
+function renderSettingsSection(content) {
+  content.innerHTML = `
+    <div style="opacity:0;animation:fadeUp .4s ease forwards">
+      <div class="section-header">
+        <span class="section-title">Settings & Integrations</span>
+      </div>
+      <div class="settings-grid">
+
+        <div class="settings-card">
+          <div class="settings-card-title">n8n Connection</div>
+          <div class="settings-card-desc">Connect this dashboard to your self-hosted n8n instance to load live Airtable data.</div>
+          <div class="settings-field">
+            <label class="settings-label" for="settingsUrl">n8n Instance URL</label>
+            <input class="settings-input" id="settingsUrl" type="url" placeholder="https://your-n8n-instance.com" value="${CONFIG.n8nBaseUrl === 'http://localhost:5678' && !localStorage.getItem('reportflow_n8n_url') ? '' : CONFIG.n8nBaseUrl}">
+          </div>
+          <div class="settings-field">
+            <label class="settings-label" for="settingsSecret">Webhook Secret <span style="color:var(--text-dim)">(optional)</span></label>
+            <div class="settings-secret-wrap">
+              <input class="settings-input" id="settingsSecret" type="password" placeholder="Leave blank if webhooks are open" value="${CONFIG.webhookSecret}">
+              <button class="settings-toggle-eye" id="toggleSecret" title="Show/hide secret">
+                <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="settings-actions">
+            <button class="btn-settings-save" id="settingsSave">Save & Reconnect</button>
+            <button class="btn-settings-test" id="settingsTest">Test Connection</button>
+            <span class="conn-status" id="connStatus" style="display:none"></span>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Connected Integrations</div>
+          <div class="settings-card-desc">Data sources feeding into your Airtable base via n8n WF1.</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            ${[
+              {name:'Google Analytics 4', dot:'var(--green)', status:'Connected', sub:'Last sync: today at 6:00 AM'},
+              {name:'Meta Business Suite', dot:'var(--green)', status:'Connected', sub:'Last sync: today at 6:00 AM'},
+              {name:'Google Ads', dot:'var(--green)', status:'Connected', sub:'Last sync: today at 6:00 AM'},
+              {name:'Stripe', dot:'var(--green)', status:'Connected', sub:'Last sync: today at 6:00 AM'},
+              {name:'Mailchimp', dot:'var(--accent)', status:'Check token', sub:'Tokens expire every 60 days'}
+            ].map(int => `
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${int.dot};flex-shrink:0"></div>
+                  <div>
+                    <div style="font-size:13px">${int.name}</div>
+                    <div style="font-size:11px;color:var(--text-dim)">${int.sub}</div>
+                  </div>
+                </div>
+                <span style="font-size:11px;color:${int.dot === 'var(--green)' ? 'var(--green)' : 'var(--accent)'}">${int.status}</span>
+              </div>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:14px">
+            Integration status reflects mock data. In live mode, status is inferred from the most recent sync timestamps in Airtable.
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">About ReportFlow</div>
+          <div class="settings-card-desc">Version 1.0 — Agency Reporting Dashboard</div>
+          <div class="about-stack">
+            <div class="about-item"><div class="about-dot"></div>n8n (self-hosted) — automation &amp; API layer</div>
+            <div class="about-item"><div class="about-dot"></div>Airtable — data warehouse (6 tables)</div>
+            <div class="about-item"><div class="about-dot" style="background:var(--green)"></div>OpenAI GPT-4o — AI report generation</div>
+            <div class="about-item"><div class="about-dot" style="background:var(--blue)"></div>No API keys in the frontend — all credentials live in n8n</div>
+          </div>
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+            <div class="settings-label" style="margin-bottom:12px">Demo Mode</div>
+            <button class="btn-settings-reset" id="settingsReset">Reset to Demo Mode</button>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:8px">Clears saved n8n URL and secret. The dashboard returns to offline mock data.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+
+  bindSettingsEvents();
+}
+
+function bindSettingsEvents() {
+  // Toggle password visibility
+  $('#toggleSecret').addEventListener('click', () => {
+    const input = $('#settingsSecret');
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    $('#eyeIcon').innerHTML = isPass
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  // Save
+  $('#settingsSave').addEventListener('click', () => {
+    const url = $('#settingsUrl').value.trim();
+    const secret = $('#settingsSecret').value.trim();
+    if (url) CONFIG.setN8nUrl(url);
+    CONFIG.setWebhookSecret(secret);
+    showConnStatus('ok', '✓ Saved — reconnecting…');
+    state.liveClientData = null;
+    loadDashboard();
+  });
+
+  // Test connection
+  $('#settingsTest').addEventListener('click', async () => {
+    const btn = $('#settingsTest');
+    btn.textContent = 'Testing…';
+    btn.disabled = true;
+    showConnStatus(null, '');
+    const url = $('#settingsUrl').value.trim();
+    if (url) CONFIG.setN8nUrl(url);
+    const clients = await ReportAPI.fetchClients();
+    btn.textContent = 'Test Connection';
+    btn.disabled = false;
+    if (clients && clients.length) {
+      showConnStatus('ok', `✓ Connected — ${clients.length} client${clients.length !== 1 ? 's' : ''} found`);
+    } else {
+      showConnStatus('fail', '✗ Could not reach n8n — check URL and that WF6 is active');
+    }
+  });
+
+  // Reset to demo
+  $('#settingsReset').addEventListener('click', () => {
+    localStorage.removeItem('reportflow_n8n_url');
+    localStorage.removeItem('reportflow_webhook_secret');
+    state.liveClients = null;
+    state.liveClientData = null;
+    $('#settingsUrl').value = '';
+    $('#settingsSecret').value = '';
+    showConnStatus('ok', '✓ Reset — showing demo data');
+    renderDashboard();
+  });
+}
+
+function showConnStatus(type, msg) {
+  const el = $('#connStatus');
+  if (!el) return;
+  if (!msg) { el.style.display = 'none'; return; }
+  el.className = `conn-status${type ? ' ' + type : ''}`;
+  el.textContent = msg;
+  el.style.display = 'inline-flex';
+}
+
+// ══════════════════════════════════════════
+// REVENUE CHART (SVG + interactive)
+// ══════════════════════════════════════════
+
+function renderRevenueChart(c) {
+  const container = $('#revenueChart');
+  const data = c.revenue;
+  if (!data || !data.length) return;
+  const maxVal = Math.max(...data.map(d => d.value)) * 1.15;
+  const minVal = 0;
+  const W = 700, H = 200, PL = 60, PR = 30, PT = 20, PB = 30;
+  const chartW = W - PL - PR;
+  const chartH = H - PT - PB;
+
+  function xPos(i) { return PL + (i / (data.length - 1)) * chartW; }
+  function yPos(v) { return PT + chartH - ((v - minVal) / (maxVal - minVal)) * chartH; }
+
+  const gridLines = [0, 15000, 30000, 45000, 60000];
+  let gridSvg = gridLines.map(v => {
+    const y = yPos(v);
+    return `<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#1e2130" stroke-width="1"/>
+            <text x="${PL-8}" y="${y+4}" text-anchor="end" fill="#504d48" font-family="DM Mono" font-size="10">${fmtK(v)}</text>`;
+  }).join('');
+
+  let linePath = data.map((d, i) => `${i===0?'M':'L'}${xPos(i)},${yPos(d.value)}`).join(' ');
+  let areaPath = linePath + ` L${xPos(data.length-1)},${PT+chartH} L${xPos(0)},${PT+chartH} Z`;
+
+  let points = data.map((d, i) => {
+    const x = xPos(i), y = yPos(d.value);
+    const change = d.prev ? ((d.value - d.prev) / d.prev * 100).toFixed(1) : 0;
+    return `<circle cx="${x}" cy="${y}" r="4" fill="#08090c" stroke="#d4a843" stroke-width="2" class="chart-point" style="transition:all .15s"/>
+            <circle cx="${x}" cy="${y}" r="20" fill="transparent" class="chart-dot-hover"
+              data-week="${d.week}" data-value="${d.value}" data-prev="${d.prev}" data-change="${change}" data-x="${x}" data-y="${y}"/>`;
+  }).join('');
+
+  let xLabels = data.map((d, i) => {
+    const x = xPos(i);
+    const isLast = i === data.length - 1;
+    return `<text x="${x}" y="${H-8}" text-anchor="middle" fill="${isLast?'#d4a843':'#504d48'}" font-family="DM Mono" font-size="10" ${isLast?'font-weight="500"':''}>${d.week}</text>`;
+  }).join('');
+
+  let crosshairV = `<line class="chart-crosshair" id="crosshairV" x1="0" y1="${PT}" x2="0" y2="${PT+chartH}"/>`;
+  let crosshairH = `<line class="chart-crosshair" id="crosshairH" x1="${PL}" y1="0" x2="${W-PR}" y2="0"/>`;
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="chart-svg">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d4a843" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#d4a843" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${gridSvg}
+      <path d="${areaPath}" fill="url(#areaGrad)" opacity="0.8"/>
+      <path d="${linePath}" fill="none" stroke="#d4a843" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${points}
+      ${crosshairV}${crosshairH}
+      ${xLabels}
+    </svg>
+    <div class="chart-tooltip" id="chartTooltip">
+      <div class="tt-label" id="ttLabel"></div>
+      <div class="tt-value" id="ttValue"></div>
+      <div class="tt-change" id="ttChange"></div>
+    </div>`;
+
+  container.querySelectorAll('.chart-dot-hover').forEach(dot => {
+    dot.addEventListener('mouseenter', () => {
+      const rect = container.getBoundingClientRect();
+      const svgRect = container.querySelector('svg').getBoundingClientRect();
+      const scale = svgRect.width / W;
+      const dotX = parseFloat(dot.dataset.x) * scale;
+      const dotY = parseFloat(dot.dataset.y) * scale;
+      const tt = $('#chartTooltip');
+      const change = parseFloat(dot.dataset.change);
+      $('#ttLabel').textContent = dot.dataset.week;
+      $('#ttValue').textContent = fmt(parseInt(dot.dataset.value));
+      $('#ttChange').textContent = `${change >= 0 ? '↑' : '↓'} ${Math.abs(change)}% vs prev`;
+      $('#ttChange').className = `tt-change ${change >= 0 ? 'up' : 'down'}`;
+      tt.style.left = Math.min(dotX - 50, rect.width - 160) + 'px';
+      tt.style.top = (dotY - 80) + 'px';
+      tt.classList.add('visible');
+      const cv = $('#crosshairV'), ch = $('#crosshairH');
+      cv.setAttribute('x1', dot.dataset.x); cv.setAttribute('x2', dot.dataset.x); cv.style.opacity = '1';
+      ch.setAttribute('y1', dot.dataset.y); ch.setAttribute('y2', dot.dataset.y); ch.style.opacity = '1';
+      dot.classList.add('active');
+      dot.previousElementSibling.setAttribute('r', '6');
+    });
+    dot.addEventListener('mouseleave', () => {
+      $('#chartTooltip').classList.remove('visible');
+      $('#crosshairV').style.opacity = '0';
+      $('#crosshairH').style.opacity = '0';
+      dot.classList.remove('active');
+      dot.previousElementSibling.setAttribute('r', '4');
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// DONUT CHART (SVG + interactive)
+// ══════════════════════════════════════════
+
+function renderDonutChart(c) {
+  const container = $('#donutChart');
+  const channels = c.channels;
+  if (!channels || !channels.length) return;
+  const total = channels.reduce((s, ch) => s + ch.value, 0);
+  const R = 54, CX = 75, CY = 75;
+  const circumference = 2 * Math.PI * R;
+
+  let offset = 0;
+  let segments = channels.map((ch) => {
+    const pct = ch.value / total;
+    const dashLen = pct * circumference;
+    const dashGap = circumference - dashLen;
+    const seg = `<circle class="donut-segment" cx="${CX}" cy="${CY}" r="${R}"
+      stroke="${ch.color}" stroke-dasharray="${dashLen} ${dashGap}"
+      stroke-dashoffset="${-offset}" data-name="${ch.name}" data-value="${ch.value}" data-pct="${ch.pct}"/>`;
+    offset += dashLen;
+    return seg;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="donut-container" id="donutContainer">
+      <svg class="donut-svg" viewBox="0 0 150 150">${segments}</svg>
+      <div class="donut-center">
+        <span class="donut-total">${fmtK(total)}</span>
+        <span class="donut-label">Total</span>
+      </div>
+      <div class="donut-tooltip" id="donutTooltip"></div>
+    </div>
+    <div class="channel-legend">
+      ${channels.map(ch => `
+        <div class="legend-item" data-channel="${ch.name}">
+          <div class="legend-dot" style="background:${ch.color}"></div>
+          <div class="legend-info">
+            <span class="legend-name">${ch.name}</span>
+            <span class="legend-value">${fmt(ch.value)} · ${ch.pct}%</span>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  container.querySelectorAll('.donut-segment').forEach(seg => {
+    seg.addEventListener('mouseenter', () => {
+      const tt = $('#donutTooltip');
+      tt.innerHTML = `<strong>${seg.dataset.name}</strong><br>${fmt(parseInt(seg.dataset.value))} · ${seg.dataset.pct}%`;
+      tt.classList.add('visible');
+    });
+    seg.addEventListener('mouseleave', () => {
+      $('#donutTooltip').classList.remove('visible');
+    });
+  });
+
+  container.querySelectorAll('.legend-item').forEach(item => {
+    item.addEventListener('mouseenter', () => {
+      const name = item.dataset.channel;
+      container.querySelectorAll('.donut-segment').forEach(s => {
+        s.style.opacity = s.dataset.name === name ? '1' : '0.25';
+        if (s.dataset.name === name) s.style.strokeWidth = '34';
+      });
+    });
+    item.addEventListener('mouseleave', () => {
+      container.querySelectorAll('.donut-segment').forEach(s => {
+        s.style.opacity = '1';
+        s.style.strokeWidth = '28';
+      });
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// PERFORMANCE GRID
+// ══════════════════════════════════════════
+
+function renderPerfGrid(c) {
+  const container = $('#perfGrid');
+  container.innerHTML = (c.performance || []).map(p => `
+    <div class="perf-card">
+      <div class="perf-header">
+        <span class="perf-channel">${p.name}</span>
+        <span class="perf-roas">ROAS <strong>${p.roas === Infinity ? '∞' : p.roas + 'x'}</strong></span>
+      </div>
+      <div class="perf-bar-bg">
+        <div class="perf-bar-fill" style="--bar-width:${p.barWidth};background:${p.gradient}"></div>
+      </div>
+      <div class="perf-stats">
+        <div class="perf-stat">
+          <span class="perf-stat-label">Spend</span>
+          <span class="perf-stat-value">${fmt(p.spend)}</span>
+        </div>
+        <div class="perf-stat">
+          <span class="perf-stat-label">Revenue</span>
+          <span class="perf-stat-value">${fmt(p.revenue)}</span>
+        </div>
+        <div class="perf-stat">
+          <span class="perf-stat-label">Conv.</span>
+          <span class="perf-stat-value">${p.conv}%</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// CAMPAIGN TABLE (sortable + searchable)
+// ══════════════════════════════════════════
+
+function renderCampaignTable(c) {
+  let campaigns = [...(c.campaigns || [])];
+
+  if (state.platformFilter && state.platformFilter !== 'all') {
+    campaigns = campaigns.filter(camp => camp.platform === state.platformFilter);
+  }
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    campaigns = campaigns.filter(camp =>
+      camp.name.toLowerCase().includes(q) || camp.platform.toLowerCase().includes(q) || camp.status.toLowerCase().includes(q)
+    );
+  }
+
+  if (state.sortColumn) {
+    campaigns.sort((a, b) => {
+      let va = a[state.sortColumn], vb = b[state.sortColumn];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (state.sortDirection === 'asc') return va > vb ? 1 : va < vb ? -1 : 0;
+      return va < vb ? 1 : va > vb ? -1 : 0;
+    });
+  }
+
+  const countEl = $('#campaignCount');
+  if (countEl) countEl.textContent = `${campaigns.length} active`;
+
+  const tableCard = $('#tableCard');
+
+  if (campaigns.length === 0) {
+    tableCard.innerHTML = `<div class="no-results">No campaigns match "${state.searchQuery}"</div>`;
+    return;
+  }
+
+  const cols = [
+    {key:'name',label:'Campaign'},
+    {key:'platform',label:'Platform'},
+    {key:'spend',label:'Spend'},
+    {key:'revenue',label:'Revenue'},
+    {key:'roas',label:'ROAS'},
+    {key:'status',label:'Status'}
+  ];
+
+  function sortArrow(key) {
+    if (state.sortColumn !== key) return '<span class="sort-arrow">↕</span>';
+    return `<span class="sort-arrow">${state.sortDirection === 'asc' ? '↑' : '↓'}</span>`;
+  }
+
+  tableCard.innerHTML = `
+    <table class="campaign-table">
+      <thead><tr>
+        ${cols.map(col => `<th data-col="${col.key}" class="${state.sortColumn===col.key?'sorted':''}">${col.label} ${sortArrow(col.key)}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${campaigns.map(camp => `
+          <tr data-campaign="${camp.name}">
+            <td class="campaign-name">${camp.name}</td>
+            <td><span class="platform-tag ${camp.platform}"><span class="dot"></span>${platformLabel(camp.platform)}</span></td>
+            <td>${fmt(camp.spend)}</td>
+            <td>${fmt(camp.revenue)}</td>
+            <td class="${roasClass(camp.roas)}">${camp.roas}x</td>
+            <td><span class="status-badge ${camp.status}">${camp.status.charAt(0).toUpperCase()+camp.status.slice(1)}</span></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  tableCard.querySelectorAll('th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (state.sortColumn === col) {
+        state.sortDirection = state.sortDirection === 'asc' ? 'desc' : state.sortDirection === 'desc' ? 'default' : 'asc';
+        if (state.sortDirection === 'default') state.sortColumn = null;
+      } else {
+        state.sortColumn = col;
+        state.sortDirection = 'asc';
+      }
+      renderCampaignTable(getClient());
+    });
+  });
+
+  tableCard.querySelectorAll('tr[data-campaign]').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const name = tr.dataset.campaign;
+      const campaign = getClient().campaigns.find(camp => camp.name === name);
+      if (campaign) openModal(campaign);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+// AI SUMMARY
+// ══════════════════════════════════════════
+
+function renderSummary(c) {
+  const container = $('#summaryCard');
+  const s = c.summary;
+  container.innerHTML = `
+    <div class="summary-header">
+      <div class="ai-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <span class="summary-title">Performance Summary</span>
+      <span class="summary-subtitle">Auto-generated · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span>
+    </div>
+    <div class="summary-body">${s.body}</div>
+    <div class="summary-insights">
+      ${s.insights.map(ins => `
+        <div class="insight-item">
+          <div class="insight-icon ${ins.type}">${ins.type==='win'?'🏆':ins.type==='watch'?'⚠️':'🚀'}</div>
+          <div class="insight-text">
+            <strong>${ins.title}</strong>
+            ${ins.text}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// COUNTER ANIMATION
+// ══════════════════════════════════════════
+
+function animateCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseFloat(el.dataset.count);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const duration = 1200;
+    const start = performance.now();
+
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = target * eased;
+      if (decimals > 0) {
+        el.textContent = prefix + current.toFixed(decimals) + suffix;
+      } else {
+        el.textContent = prefix + Math.round(current).toLocaleString('en-US') + suffix;
+      }
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+// ══════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════
+
+function startClock() {
+  function update() {
+    const el = $('#live-clock');
+    if (el) el.textContent = 'Last synced: ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'});
+  }
+  update();
+  setInterval(update, 1000);
+}
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+
+function openModal(campaign) {
+  const overlay = $('#modalOverlay');
+  const body = $('#modalBody');
+  $('#modalTitle').textContent = 'Campaign Details';
+
+  body.innerHTML = `
+    <div class="modal-campaign-name">${campaign.name}</div>
+    <div class="modal-campaign-platform">
+      <span class="platform-tag ${campaign.platform}"><span class="dot"></span>${platformLabel(campaign.platform)}</span>
+      <span class="status-badge ${campaign.status}" style="margin-left:8px">${campaign.status.charAt(0).toUpperCase()+campaign.status.slice(1)}</span>
+    </div>
+    <div class="modal-stats-grid">
+      <div class="modal-stat">
+        <div class="modal-stat-label">Spend</div>
+        <div class="modal-stat-value">${fmt(campaign.spend)}</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-label">Revenue</div>
+        <div class="modal-stat-value">${fmt(campaign.revenue)}</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-label">ROAS</div>
+        <div class="modal-stat-value" style="color:${campaign.roas>=4?'var(--green)':campaign.roas>=2.5?'var(--accent)':'var(--red)'}">${campaign.roas}x</div>
+      </div>
+    </div>
+    <div class="modal-section-title">Performance Breakdown</div>
+    <div class="modal-bar">
+      <div class="modal-bar-label"><span>Impressions</span><span>${campaign.impressions.toLocaleString()}</span></div>
+      <div class="modal-bar-bg"><div class="modal-bar-fill" style="width:0;background:var(--accent);transition-delay:.1s" id="modalBar1"></div></div>
+    </div>
+    <div class="modal-bar">
+      <div class="modal-bar-label"><span>Clicks</span><span>${campaign.clicks.toLocaleString()}</span></div>
+      <div class="modal-bar-bg"><div class="modal-bar-fill" style="width:0;background:var(--blue);transition-delay:.2s" id="modalBar2"></div></div>
+    </div>
+    <div class="modal-bar">
+      <div class="modal-bar-label"><span>CTR</span><span>${campaign.ctr}%</span></div>
+      <div class="modal-bar-bg"><div class="modal-bar-fill" style="width:0;background:var(--green);transition-delay:.3s" id="modalBar3"></div></div>
+    </div>
+    <div class="modal-bar">
+      <div class="modal-bar-label"><span>CPC</span><span>$${campaign.cpc.toFixed(2)}</span></div>
+      <div class="modal-bar-bg"><div class="modal-bar-fill" style="width:0;background:var(--purple);transition-delay:.4s" id="modalBar4"></div></div>
+    </div>
+    <div class="modal-section-title" style="margin-top:24px">Spend vs Revenue</div>
+    <div class="modal-bar">
+      <div class="modal-bar-label"><span>Spend</span><span>${fmt(campaign.spend)}</span></div>
+      <div class="modal-bar-bg"><div class="modal-bar-fill" style="width:0;background:var(--red);transition-delay:.5s" id="modalBar5"></div></div>
+    </div>
+    <div class="modal-bar">
+      <div class="modal-bar-label"><span>Revenue</span><span>${fmt(campaign.revenue)}</span></div>
+      <div class="modal-bar-bg"><div class="modal-bar-fill" style="width:0;background:var(--green);transition-delay:.6s" id="modalBar6"></div></div>
+    </div>`;
+
+  overlay.classList.add('visible');
+
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const allCampaigns = getClient().campaigns;
+      const maxImp   = Math.max(...allCampaigns.map(c => c.impressions));
+      const maxClick = Math.max(...allCampaigns.map(c => c.clicks));
+      const maxSpend = Math.max(...allCampaigns.map(c => c.spend));
+      const maxRev   = Math.max(...allCampaigns.map(c => c.revenue));
+      $('#modalBar1').style.width = (campaign.impressions / maxImp   * 100) + '%';
+      $('#modalBar2').style.width = (campaign.clicks     / maxClick  * 100) + '%';
+      $('#modalBar3').style.width = Math.min(campaign.ctr  * 5,  100) + '%';
+      $('#modalBar4').style.width = Math.min(campaign.cpc  * 60, 100) + '%';
+      $('#modalBar5').style.width = (campaign.spend    / maxSpend  * 100) + '%';
+      $('#modalBar6').style.width = (campaign.revenue  / maxRev    * 100) + '%';
+    }, 100);
+  });
+}
+
+function closeModal() {
+  $('#modalOverlay').classList.remove('visible');
+}
+
+// ══════════════════════════════════════════
+// CLIENT DROPDOWN
+// ══════════════════════════════════════════
+
+function renderClientDropdown() {
+  const clients = getActiveClients();
+  const dd = $('#clientDropdown');
+  dd.innerHTML = clients.map((c, i) => `
+    <div class="client-option ${i===state.activeClient?'selected':''}" data-index="${i}">
+      <div class="client-option-avatar" style="background:${c.gradient}">${c.initials}</div>
+      <div class="client-option-info">
+        <span class="client-option-name">${c.name}</span>
+        <span class="client-option-meta">${c.niche} · ${c.activeCampaigns} campaigns</span>
+      </div>
+    </div>`).join('');
+
+  dd.querySelectorAll('.client-option').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(opt.dataset.index);
+      if (idx !== state.activeClient) {
+        state.activeClient = idx;
+        state.sortColumn = null;
+        state.sortDirection = 'default';
+        state.searchQuery = '';
+        state.liveClientData = null;
+        updateClientUI();
+        saveState();
+        loadDashboard(); // fetch live data for new client
+      }
+      toggleClientDropdown(false);
+    });
+  });
+}
+
+function updateClientUI() {
+  const c = getClient();
+  $('#clientAvatar').textContent = c.initials;
+  $('#clientAvatar').style.background = c.gradient;
+  $('#clientName').textContent = c.name;
+  $('#clientMeta').textContent = `${c.niche} · ${c.activeCampaigns} campaigns active`;
+}
+
+function toggleClientDropdown(force) {
+  state.clientDropdownOpen = force !== undefined ? force : !state.clientDropdownOpen;
+  $('#clientSelector').classList.toggle('open', state.clientDropdownOpen);
+  if (state.clientDropdownOpen) {
+    state.dateDropdownOpen = false;
+    $('#dateDropdown').classList.remove('open');
+  }
+}
+
+// ══════════════════════════════════════════
+// DATE RANGE
+// ══════════════════════════════════════════
+
+function renderDateDropdown() {
+  const dd = $('#dateDropdown');
+  dd.innerHTML = DATE_RANGES.map((d, i) => `
+    <div class="date-option ${i===state.activeDateRange?'selected':''}" data-index="${i}">${d.label}</div>`).join('');
+
+  dd.querySelectorAll('.date-option').forEach(opt => {
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(opt.dataset.index);
+      state.activeDateRange = idx;
+      state.liveClientData = null;
+      $('#dateLabel').textContent = DATE_RANGES[idx].value;
+      dd.querySelectorAll('.date-option').forEach((o, oi) => o.classList.toggle('selected', oi === idx));
+      toggleDateDropdown(false);
+      saveState();
+      loadDashboard(); // fetch live data for new date range
+    });
+  });
+}
+
+function toggleDateDropdown(force) {
+  state.dateDropdownOpen = force !== undefined ? force : !state.dateDropdownOpen;
+  $('#dateDropdown').classList.toggle('open', state.dateDropdownOpen);
+  if (state.dateDropdownOpen) {
+    state.clientDropdownOpen = false;
+    $('#clientSelector').classList.remove('open');
+  }
+}
+
+// ══════════════════════════════════════════
+// EVENT BINDINGS
+// ══════════════════════════════════════════
+
+function bindEvents() {
+  const searchInput = $('#searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value;
+      renderCampaignTable(getClient());
+    });
+  }
+}
+
+function bindGlobalEvents() {
+  $('#clientSelector').addEventListener('click', (e) => {
+    if (e.target.closest('.client-dropdown')) return;
+    toggleClientDropdown();
+  });
+
+  $('#dateBadge').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDateDropdown();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#clientSelector')) toggleClientDropdown(false);
+    if (!e.target.closest('#dateBadge') && !e.target.closest('#dateDropdown')) toggleDateDropdown(false);
+  });
+
+  $('#modalClose').addEventListener('click', closeModal);
+  $('#modalOverlay').addEventListener('click', (e) => {
+    if (e.target === $('#modalOverlay')) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  $('#exportBtn').addEventListener('click', () => {
+    window.print();
+  });
+
+  $$('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const section = item.dataset.section;
+      if (section) {
+        state.activeSection = section;
+        $$('.nav-item').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        renderDashboard();
+        saveState();
+        // Close mobile sidebar after navigation
+        if (window.innerWidth <= 768) {
+          $('#sidebar').classList.remove('open');
+        }
+      }
+    });
+  });
+
+  $('#mobileToggle').addEventListener('click', () => {
+    $('#sidebar').classList.toggle('open');
+  });
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+async function init() {
+  updateClientUI();
+  renderClientDropdown();
+  renderDateDropdown();
+  $('#dateLabel').textContent = DATE_RANGES[state.activeDateRange].value;
+
+  $$('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.section === state.activeSection);
+  });
+
+  bindGlobalEvents();
+
+  // Render mock data immediately (zero delay, works offline)
+  renderDashboard();
+
+  // Then try to fetch live data in the background
+  const liveClients = await ReportAPI.fetchClients();
+  if (liveClients && liveClients.length) {
+    state.liveClients = liveClients;
+    // Keep activeClient index in bounds
+    if (state.activeClient >= liveClients.length) state.activeClient = 0;
+    renderClientDropdown();
+    updateClientUI();
+  }
+
+  // Load live dashboard data (will fall back to mock silently if n8n unreachable)
+  await loadDashboard();
+}
+
+init();
+</script>
+</body>
+</html>

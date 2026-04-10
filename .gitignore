@@ -1,0 +1,38 @@
+# Secrets — never commit these
+.env
+.env.local
+
+# Temporary processing files — regenerated as needed
+.tmp/
+
+# Google OAuth tokens
+credentials.json
+token.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+.vercel/
+out/
+
+# Claude Code local settings
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,296 @@
+{
+  "name": "WF6: Dashboard API (Webhook)",
+  "nodes": [
+    {
+      "id": "wf6-001",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 400],
+      "parameters": {
+        "path": "reportflow/dashboard",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "wf6-002",
+      "name": "Clients Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 600],
+      "parameters": {
+        "path": "reportflow/clients",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "wf6-003",
+      "name": "Compute Date Window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 400],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const secret = $input.first().headers?.['x-webhook-secret'] || '';\nif (secret !== 'YOUR_WEBHOOK_SECRET') throw new Error('Unauthorized');\n\nconst body = $input.first().json.body || $input.first().json;\nconst clientId = body.clientId || body.client_id || '';\nconst dateRange = body.dateRange || 'this_month';\n\nconst now = $now;\nlet periodStart, periodEnd, prevStart, prevEnd;\n\nswitch (dateRange) {\n  case 'last_month': {\n    const lastMonthEnd = now.startOf('month').minus({ days: 1 });\n    const lastMonthStart = lastMonthEnd.startOf('month');\n    periodStart = lastMonthStart.toFormat('yyyy-MM-dd');\n    periodEnd = lastMonthEnd.toFormat('yyyy-MM-dd');\n    const prevMonthEnd = lastMonthStart.minus({ days: 1 });\n    prevStart = prevMonthEnd.startOf('month').toFormat('yyyy-MM-dd');\n    prevEnd = prevMonthEnd.toFormat('yyyy-MM-dd');\n    break;\n  }\n  case 'q1': {\n    const year = now.year;\n    periodStart = `${year}-01-01`;\n    periodEnd = `${year}-03-31`;\n    prevStart = `${year - 1}-01-01`;\n    prevEnd = `${year - 1}-03-31`;\n    break;\n  }\n  case 'last_90': {\n    periodEnd = now.toFormat('yyyy-MM-dd');\n    periodStart = now.minus({ days: 90 }).toFormat('yyyy-MM-dd');\n    prevEnd = now.minus({ days: 91 }).toFormat('yyyy-MM-dd');\n    prevStart = now.minus({ days: 180 }).toFormat('yyyy-MM-dd');\n    break;\n  }\n  case 'ytd': {\n    periodStart = `${now.year}-01-01`;\n    periodEnd = now.toFormat('yyyy-MM-dd');\n    prevStart = `${now.year - 1}-01-01`;\n    prevEnd = `${now.year - 1}-${now.toFormat('MM-dd')}`;\n    break;\n  }\n  default: { // this_month\n    periodStart = now.startOf('month').toFormat('yyyy-MM-dd');\n    periodEnd = now.toFormat('yyyy-MM-dd');\n    const prevMonthEnd = now.startOf('month').minus({ days: 1 });\n    prevStart = prevMonthEnd.startOf('month').toFormat('yyyy-MM-dd');\n    prevEnd = prevMonthEnd.toFormat('yyyy-MM-dd');\n  }\n}\n\nreturn [{ json: { clientId, dateRange, periodStart, periodEnd, prevStart, prevEnd } }];"
+      }
+    },
+    {
+      "id": "wf6-004",
+      "name": "Get Client Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 280],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "Clients", "mode": "name" },
+        "options": {
+          "filterByFormula": "={client_id} = '{{ $json.clientId }}'",
+          "maxRecords": 1
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-005",
+      "name": "Get Current KPIs",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 440],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "KPI Snapshots", "mode": "name" },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.clientId }}', IS_AFTER({snapshot_date}, '{{ $json.periodStart }}'), IS_BEFORE({snapshot_date}, DATEADD('{{ $json.periodEnd }}', 1, 'days')))",
+          "sort": [{ "field": "snapshot_date", "direction": "desc" }]
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-006",
+      "name": "Get Previous KPIs",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 580],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "KPI Snapshots", "mode": "name" },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.clientId }}', IS_AFTER({snapshot_date}, '{{ $json.prevStart }}'), IS_BEFORE({snapshot_date}, DATEADD('{{ $json.prevEnd }}', 1, 'days')))"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-007",
+      "name": "Get Revenue Data",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 720],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "Revenue", "mode": "name" },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.clientId }}', IS_AFTER({week_start}, '{{ $json.periodStart }}'), IS_BEFORE({week_start}, DATEADD('{{ $json.periodEnd }}', 1, 'days')))",
+          "sort": [{ "field": "week_start", "direction": "asc" }]
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-008",
+      "name": "Get Channel Performance",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 860],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "Channel Performance", "mode": "name" },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.clientId }}', IS_AFTER({period_start}, '{{ $json.periodStart }}'))",
+          "sort": [{ "field": "total_revenue", "direction": "desc" }],
+          "maxRecords": 10
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-009",
+      "name": "Get Campaigns",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 1000],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "Campaigns", "mode": "name" },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.clientId }}', OR(IS_AFTER({last_synced}, '{{ $json.periodStart }}'), {status} = 'Active'))",
+          "sort": [{ "field": "revenue", "direction": "desc" }],
+          "maxRecords": 25
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-010",
+      "name": "Get AI Summary",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [720, 1140],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "AI Summaries", "mode": "name" },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.clientId }}', OR({status} = 'Draft', {status} = 'Sent'), IS_AFTER({period_start}, '{{ $json.periodStart }}'))",
+          "sort": [{ "field": "generated_at", "direction": "desc" }],
+          "maxRecords": 1
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-011",
+      "name": "Assemble Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 700],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const params   = $('Compute Date Window').first().json;\nconst clientRec = $('Get Client Record').first()?.json || {};\nconst currKpis  = $('Get Current KPIs').all().map(i => i.json);\nconst prevKpis  = $('Get Previous KPIs').all().map(i => i.json);\nconst revRows   = $('Get Revenue Data').all().map(i => i.json);\nconst channels  = $('Get Channel Performance').all().map(i => i.json);\nconst campaigns = $('Get Campaigns').all().map(i => i.json);\nconst summaryRec = $('Get AI Summary').first()?.json || {};\n\n// ── Aggregate current KPIs ──\nconst currRevenue = currKpis.reduce((s, r) => s + (r.total_revenue || 0), 0);\nconst currSpend   = currKpis.reduce((s, r) => s + (r.ad_spend || 0), 0);\nconst currOrders  = currKpis.reduce((s, r) => s + (r.total_orders || 0), 0);\nconst currSess    = currKpis.reduce((s, r) => s + (r.total_sessions || 0), 0);\nconst currRoas    = currSpend > 0 ? parseFloat((currRevenue / currSpend).toFixed(2)) : 0;\nconst currConv    = currSess > 0  ? parseFloat(((currOrders / currSess) * 100).toFixed(2)) : 0;\n\n// ── Aggregate previous KPIs ──\nconst prevRevenue = prevKpis.reduce((s, r) => s + (r.total_revenue || 0), 0);\nconst prevSpend   = prevKpis.reduce((s, r) => s + (r.ad_spend || 0), 0);\nconst prevOrders  = prevKpis.reduce((s, r) => s + (r.total_orders || 0), 0);\nconst prevSess    = prevKpis.reduce((s, r) => s + (r.total_sessions || 0), 0);\nconst prevRoas    = prevSpend > 0 ? parseFloat((prevRevenue / prevSpend).toFixed(2)) : 0;\nconst prevConv    = prevSess > 0  ? parseFloat(((prevOrders / prevSess) * 100).toFixed(2)) : 0;\n\nfunction pct(curr, prev) {\n  if (!prev) return 0;\n  return parseFloat(((curr - prev) / prev * 100).toFixed(1));\n}\n\n// ── Revenue trend (group current by week_label) ──\nconst weekMap = {};\nfor (const r of revRows) {\n  const label = r.week_label || r.week_start || 'Unknown';\n  if (!weekMap[label]) weekMap[label] = { label, value: 0 };\n  weekMap[label].value += r.revenue || 0;\n}\n\n// Build prev-period weekly revenue from daily KPI snapshots\nconst prevWeekRevMap = {};\nfor (const r of prevKpis) {\n  if (!r.snapshot_date) continue;\n  const d = new Date(r.snapshot_date + 'T00:00:00Z');\n  const dow = d.getUTCDay();\n  d.setUTCDate(d.getUTCDate() + (dow === 0 ? -6 : 1 - dow));\n  const weekKey = d.toISOString().split('T')[0];\n  if (!prevWeekRevMap[weekKey]) prevWeekRevMap[weekKey] = 0;\n  prevWeekRevMap[weekKey] += r.total_revenue || 0;\n}\nconst prevWeekValues = Object.values(prevWeekRevMap).map(v => parseFloat(v.toFixed(2)));\n\nconst revenueData = Object.values(weekMap).map((w, i) => ({\n  label: w.label,\n  value: parseFloat(w.value.toFixed(2)),\n  prev: prevWeekValues[i] || 0\n}));\n\n// ── Channel data ──\nconst totalChRevenue = channels.reduce((s, ch) => s + (ch.total_revenue || 0), 0);\nconst channelData = channels.map(ch => ({\n  name:        ch.channel,\n  percentage:  totalChRevenue > 0 ? Math.round((ch.total_revenue / totalChRevenue) * 100) : 0,\n  spend:       parseFloat((ch.total_spend   || 0).toFixed(2)),\n  revenue:     parseFloat((ch.total_revenue || 0).toFixed(2)),\n  roas:        parseFloat((ch.roas          || 0).toFixed(2)),\n  barWidthPct: ch.bar_width_pct || 50,\n  convRate:    parseFloat((ch.avg_conv_rate || 0).toFixed(1))\n}));\n\n// ── Campaigns ──\nconst campaignData = campaigns.map(c => ({\n  id:          c.campaign_id || '',\n  name:        c.campaign_name || '',\n  platform:    c.platform || '',\n  spend:       parseFloat((c.spend       || 0).toFixed(2)),\n  revenue:     parseFloat((c.revenue     || 0).toFixed(2)),\n  roas:        parseFloat((c.roas        || c.revenue / (c.spend || 1)).toFixed(2)),\n  status:      c.status || 'Active',\n  impressions: c.impressions || 0,\n  clicks:      c.clicks      || 0,\n  ctr:         parseFloat((c.ctr || 0).toFixed(1)),\n  cpc:         parseFloat((c.cpc || 0).toFixed(2))\n}));\n\n// ── AI Summary ──\nconst aiSummary = {\n  bodyHtml: summaryRec.body_html || '<p>AI summary will appear after the next weekly report generation.</p>',\n  win:   { title: summaryRec.insight_1_title || 'Win',        text: summaryRec.insight_1_text || '' },\n  watch: { title: summaryRec.insight_2_title || 'Watch',      text: summaryRec.insight_2_text || '' },\n  next:  { title: summaryRec.insight_3_title || 'Next Steps', text: summaryRec.insight_3_text || '' }\n};\n\n// ── Client metadata ──\nconst name = clientRec.company_name || params.clientId;\nconst initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();\n\nreturn [{\n  json: {\n    client: {\n      id:       params.clientId,\n      name,\n      niche:    clientRec.niche || '',\n      color:    clientRec.brand_color || '#6366f1',\n      initials\n    },\n    kpis: {\n      revenue:          parseFloat(currRevenue.toFixed(2)),\n      revenueChange:    pct(currRevenue, prevRevenue),\n      conversionRate:   currConv,\n      conversionChange: parseFloat((currConv - prevConv).toFixed(2)),\n      adSpend:          parseFloat(currSpend.toFixed(2)),\n      adSpendChange:    pct(currSpend, prevSpend),\n      roas:             currRoas,\n      roasChange:       parseFloat((currRoas - prevRoas).toFixed(2))\n    },\n    revenueData,\n    channels: channelData,\n    campaigns: campaignData,\n    aiSummary,\n    lastSynced: new Date().toISOString()\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf6-012",
+      "name": "Respond Dashboard",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1240, 700],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "application/json" },
+              { "name": "Access-Control-Allow-Origin", "value": "https://YOUR_DASHBOARD_DOMAIN" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "wf6-013",
+      "name": "Get All Clients",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [480, 600],
+      "parameters": {
+        "operation": "search",
+        "base": { "value": "YOUR_AIRTABLE_BASE_ID", "mode": "id" },
+        "table": { "value": "Clients", "mode": "name" },
+        "options": {
+          "filterByFormula": "{status} = 'Active'",
+          "sort": [{ "field": "company_name", "direction": "asc" }]
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": { "id": "1", "name": "Airtable account" }
+      }
+    },
+    {
+      "id": "wf6-014",
+      "name": "Format Clients List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 600],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const secret = $input.first().headers?.['x-webhook-secret'] || '';\nif (secret !== 'YOUR_WEBHOOK_SECRET') throw new Error('Unauthorized');\n\nconst clients = $input.all().map(item => {\n  const c = item.json;\n  const name = c.company_name || '';\n  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();\n  return {\n    id:            c.client_id,\n    name,\n    niche:         c.niche || '',\n    color:         c.brand_color || '#6366f1',\n    initials,\n    campaignCount: 0  // optionally join with Campaigns count\n  };\n});\nreturn [{ json: clients }];"
+      }
+    },
+    {
+      "id": "wf6-015",
+      "name": "Respond Clients",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [960, 600],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              { "name": "Content-Type", "value": "application/json" },
+              { "name": "Access-Control-Allow-Origin", "value": "https://YOUR_DASHBOARD_DOMAIN" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Compute Date Window", "type": "main", "index": 0 }]]
+    },
+    "Compute Date Window": {
+      "main": [[
+        { "node": "Get Client Record",      "type": "main", "index": 0 },
+        { "node": "Get Current KPIs",       "type": "main", "index": 0 },
+        { "node": "Get Previous KPIs",      "type": "main", "index": 0 },
+        { "node": "Get Revenue Data",       "type": "main", "index": 0 },
+        { "node": "Get Channel Performance","type": "main", "index": 0 },
+        { "node": "Get Campaigns",          "type": "main", "index": 0 },
+        { "node": "Get AI Summary",         "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Client Record":       { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Get Current KPIs":        { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Get Previous KPIs":       { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Get Revenue Data":        { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Get Channel Performance": { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Get Campaigns":           { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Get AI Summary":          { "main": [[{ "node": "Assemble Response", "type": "main", "index": 0 }]] },
+    "Assemble Response":       { "main": [[{ "node": "Respond Dashboard", "type": "main", "index": 0 }]] },
+    "Clients Webhook":         { "main": [[{ "node": "Get All Clients",   "type": "main", "index": 0 }]] },
+    "Get All Clients":         { "main": [[{ "node": "Format Clients List","type": "main", "index": 0 }]] },
+    "Format Clients List":     { "main": [[{ "node": "Respond Clients",   "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "workflow-6",
+  "_notes": [
+    "Replace YOUR_AIRTABLE_BASE_ID in all Airtable nodes before activating.",
+    "Set responseMode to 'responseNode' in both Webhook Trigger nodes.",
+    "CORS header Access-Control-Allow-Origin: * is set for local dev. Restrict to your domain in production.",
+    "The 7 parallel Airtable fetches after Compute Date Window run concurrently — connect all to a Merge node if needed.",
+    "See workflows/fetch_dashboard_data.md for full documentation."
+  ]
+}

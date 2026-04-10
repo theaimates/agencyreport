@@ -1,0 +1,332 @@
+{
+  "name": "WF4: AI Report Generation",
+  "nodes": [
+    {
+      "id": "wf4-001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 400],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [1],
+              "triggerAtHour": 7,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wf4-002",
+      "name": "Get Active Clients",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [500, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Clients",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "{status} = 'Active'"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf4-003",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [750, 400],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "wf4-004",
+      "name": "Get KPI Snapshots",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1000, 220],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "KPI Snapshots",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.client_id }}', IS_AFTER({snapshot_date}, DATEADD(TODAY(), -14, 'days')))",
+          "sort": [
+            {
+              "field": "snapshot_date",
+              "direction": "desc"
+            }
+          ],
+          "maxRecords": 14
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf4-005",
+      "name": "Get Channel Performance",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1000, 440],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Channel Performance",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.client_id }}', IS_AFTER({period_start}, DATEADD(TODAY(), -7, 'days')))"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf4-006",
+      "name": "Get Top Campaigns",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1000, 660],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Campaigns",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.client_id }}', {status} = 'Active')",
+          "sort": [
+            {
+              "field": "roas",
+              "direction": "desc"
+            }
+          ],
+          "maxRecords": 10
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf4-007",
+      "name": "Inner Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1260, 440],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 3
+      }
+    },
+    {
+      "id": "wf4-008",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 440],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const kpis = $('Get KPI Snapshots').all();\nconst channels = $('Get Channel Performance').all();\nconst campaigns = $('Get Top Campaigns').all();\nconst client = $('Get Active Clients').first().json;\n\nconst latest = kpis[0]?.json || {};\nconst targetDate = $now.minus({ days: 7 }).toFormat('yyyy-MM-dd');\nconst previous = (kpis.find(k => k.json.snapshot_date <= targetDate) || kpis[kpis.length - 1])?.json || {};\n\nconst periodStart = $now.minus({ days: 7 }).toFormat('yyyy-MM-dd');\nconst periodEnd = $now.minus({ days: 1 }).toFormat('yyyy-MM-dd');\n\nconst channelLines = channels.map(c =>\n  `- ${c.json.channel}: $${(c.json.total_revenue || 0).toFixed(2)} revenue, $${(c.json.total_spend || 0).toFixed(2)} spend, ${(c.json.roas || 0).toFixed(2)}x ROAS`\n).join('\\n') || '- No channel data available';\n\nconst campaignLines = campaigns.slice(0, 5).map(c =>\n  `- ${c.json.campaign_name} (${c.json.platform}): $${(c.json.revenue || 0).toFixed(2)} rev, ${(c.json.roas || 0).toFixed(2)}x ROAS, ${c.json.status}`\n).join('\\n') || '- No campaign data available';\n\nconst revChange = previous.total_revenue > 0\n  ? (((latest.total_revenue - previous.total_revenue) / previous.total_revenue) * 100).toFixed(1)\n  : 'N/A';\n\nconst prompt = `You are a marketing analytics expert generating a weekly performance report for ${client.company_name || 'our client'} (${client.niche || 'ecommerce'} industry).\n\n## This Week's KPIs (${periodStart} to ${periodEnd})\n- Total Revenue: $${(latest.total_revenue || 0).toFixed(2)} (vs last week: $${(previous.total_revenue || 0).toFixed(2)}, change: ${revChange}%)\n- Ad Spend: $${(latest.ad_spend || 0).toFixed(2)} (vs last week: $${(previous.ad_spend || 0).toFixed(2)})\n- ROAS: ${(latest.roas || 0).toFixed(2)}x (vs last week: ${(previous.roas || 0).toFixed(2)}x)\n- Conversion Rate: ${(latest.conversion_rate || 0).toFixed(2)}% (vs last week: ${(previous.conversion_rate || 0).toFixed(2)}%)\n- Total Orders: ${latest.total_orders || 0}\n- Total Sessions: ${latest.total_sessions || 0}\n- Avg Order Value: $${(latest.avg_order_value || 0).toFixed(2)}\n\n## Channel Breakdown\n${channelLines}\n\n## Top Campaigns\n${campaignLines}\n\n## Instructions\nWrite a concise, insightful weekly report in HTML format. Use <p> tags for paragraphs. Highlight key numbers with <span class=\"hl\"> tags. Use <strong> for emphasis.\n\nThen provide exactly 3 insights labeled clearly:\n1. Win — the best performing thing this week\n2. Watch — something that needs attention\n3. Next — a recommended action\n\nFormat each insight as:\n[number]. [Win/Watch/Next]: [Title]\n[Body text of the insight]\n\nKeep the tone professional but conversational. Total length: 3 short paragraphs + 3 insights.`;\n\nreturn [{ json: { prompt, client_id: client.client_id, period_start: periodStart, period_end: periodEnd } }];"
+      }
+    },
+    {
+      "id": "wf4-009",
+      "name": "Call OpenAI API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1740, 440],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'gpt-4o', max_tokens: 1500, messages: [{ role: 'user', content: $json.prompt }] }) }}"
+      },
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "6",
+          "name": "OpenAI API Key"
+        }
+      }
+    },
+    {
+      "id": "wf4-010",
+      "name": "Parse OpenAI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, 440],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response = $input.first().json;\nconst promptData = $('Build Prompt').first().json;\nconst clientItem = $('Get Active Clients').first().json;\nconst content = response.choices?.[0]?.message?.content || '';\n\n// Split body from insights\nconst parts = content.split(/(?=\\d+\\.\\s*(?:Win|Watch|Next))/i);\nconst bodyHtml = parts[0].trim();\n\nconst insights = [];\nfor (let i = 1; i < parts.length && i <= 3; i++) {\n  const text = parts[i].trim();\n  const typeMatch = text.match(/\\d+\\.\\s*(Win|Watch|Next)/i);\n  const type = typeMatch ? typeMatch[1].toLowerCase() : ['win', 'watch', 'next'][i - 1];\n\n  // Extract title after the type label (e.g., \"1. Win: Title here\")\n  const titleMatch = text.match(/\\d+\\.\\s*(?:Win|Watch|Next)[:\\s]+([^\\n]+)/i);\n  const title = titleMatch ? titleMatch[1].trim() : type.charAt(0).toUpperCase() + type.slice(1);\n\n  // Rest is the body\n  const lines = text.split('\\n').filter(l => l.trim());\n  const body = lines.slice(1).join(' ').trim();\n\n  insights.push({ type, title, text: body });\n}\n\n// Pad insights to always have 3\nconst defaultInsights = [\n  { type: 'win', title: 'Top Performer', text: 'Review your best performing campaign this week.' },\n  { type: 'watch', title: 'Area to Monitor', text: 'Keep an eye on your conversion rate trends.' },\n  { type: 'next', title: 'Recommended Action', text: 'Consider optimizing your top ad spend channel.' }\n];\nfor (let i = insights.length; i < 3; i++) {\n  insights.push(defaultInsights[i]);\n}\n\nreturn [{\n  json: {\n    client: clientItem.client_id,\n    body_html: bodyHtml,\n    insight_1_type: insights[0].type,\n    insight_1_title: insights[0].title,\n    insight_1_text: insights[0].text,\n    insight_2_type: insights[1].type,\n    insight_2_title: insights[1].title,\n    insight_2_text: insights[1].text,\n    insight_3_type: insights[2].type,\n    insight_3_title: insights[2].title,\n    insight_3_text: insights[2].text,\n    period_start: promptData.period_start,\n    period_end: promptData.period_end,\n    generated_at: new Date().toISOString(),\n    status: 'Draft'\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf4-011",
+      "name": "Write to AI Summaries",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [2220, 440],
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "AI Summaries",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Get Active Clients", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Active Clients": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          { "node": "Get KPI Snapshots", "type": "main", "index": 0 },
+          { "node": "Get Channel Performance", "type": "main", "index": 0 },
+          { "node": "Get Top Campaigns", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    },
+    "Get KPI Snapshots": {
+      "main": [
+        [
+          { "node": "Inner Merge", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Channel Performance": {
+      "main": [
+        [
+          { "node": "Inner Merge", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Get Top Campaigns": {
+      "main": [
+        [
+          { "node": "Inner Merge", "type": "main", "index": 2 }
+        ]
+      ]
+    },
+    "Inner Merge": {
+      "main": [
+        [
+          { "node": "Build Prompt", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          { "node": "Call OpenAI API", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Call OpenAI API": {
+      "main": [
+        [
+          { "node": "Parse OpenAI Response", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Parse OpenAI Response": {
+      "main": [
+        [
+          { "node": "Write to AI Summaries", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Write to AI Summaries": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "workflow-4"
+}

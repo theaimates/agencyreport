@@ -1,0 +1,26 @@
+# Python automation tools — local/server use only, not for Vercel
+tools/
+
+# n8n workflow JSON files — imported into n8n directly, not hosted on Vercel
+workflows/
+
+# Static marketing frontend — separate deployment if needed
+frontend/
+
+# Standalone HTML files
+case-study.html
+
+# Temporary processing files
+.tmp/
+
+# Claude Code local settings
+.claude/
+
+# Python environment
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Docs
+README.md

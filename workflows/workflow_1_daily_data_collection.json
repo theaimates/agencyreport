@@ -1,0 +1,693 @@
+{
+  "name": "WF1: Daily Data Collection",
+  "nodes": [
+    {
+      "id": "wf1-001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 500],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24,
+              "triggerAtHour": 6,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wf1-002",
+      "name": "Get Active Clients",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [500, 500],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Clients",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "{status} = 'Active'"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf1-003",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [750, 500],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "wf1-004",
+      "name": "GA4 Run Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 100],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "=https://analyticsdata.googleapis.com/v1beta/properties/{{ $json.ga4_property_id }}:runReport",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "{\"dateRanges\":[{\"startDate\":\"yesterday\",\"endDate\":\"yesterday\"}],\"dimensions\":[{\"name\":\"date\"},{\"name\":\"sessionDefaultChannelGroup\"}],\"metrics\":[{\"name\":\"totalRevenue\"},{\"name\":\"sessions\"},{\"name\":\"transactions\"},{\"name\":\"conversions\"},{\"name\":\"averageOrderValue\"}]}"
+      },
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "2",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "id": "wf1-005",
+      "name": "Parse GA4 Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1240, 100],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows = $input.all();\nconst data = rows[0].json;\nconst clientItem = $('Get Active Clients').first();\n\nif (!data || data.error || data.code) {\n  return [{ json: { platform: 'ga4', client_id: clientItem.json.client_id, revenue: 0, sessions: 0, transactions: 0, spend: 0, error: true } }];\n}\n\nconst results = [];\n\nif (data.rows) {\n  for (const row of data.rows) {\n    results.push({\n      date: row.dimensionValues[0].value,\n      channel: row.dimensionValues[1].value,\n      revenue: parseFloat(row.metricValues[0].value) || 0,\n      sessions: parseInt(row.metricValues[1].value) || 0,\n      transactions: parseInt(row.metricValues[2].value) || 0,\n      conversions: parseInt(row.metricValues[3].value) || 0,\n      aov: parseFloat(row.metricValues[4].value) || 0,\n      client_id: clientItem.json.client_id,\n      platform: 'ga4',\n      source: 'Google Analytics 4'\n    });\n  }\n}\nreturn results.map(r => ({ json: r }));"
+      }
+    },
+    {
+      "id": "wf1-006",
+      "name": "Meta Get Campaigns",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 320],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "=https://graph.facebook.com/v19.0/act_{{ $json.meta_ad_account_id }}/campaigns",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "id,name,status,effective_status"
+            },
+            {
+              "name": "filtering",
+              "value": "[{\"field\":\"effective_status\",\"operator\":\"IN\",\"value\":[\"ACTIVE\",\"PAUSED\"]}]"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "3",
+          "name": "Meta Bearer Token"
+        }
+      }
+    },
+    {
+      "id": "wf1-007",
+      "name": "Meta Inner Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1240, 320],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "wf1-008",
+      "name": "Meta Get Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1480, 320],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.id }}/insights",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "impressions,clicks,ctr,spend,cpc,actions,action_values,campaign_id,campaign_name"
+            },
+            {
+              "name": "time_range",
+              "value": "={{ JSON.stringify({ since: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'), until: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }) }}"
+            },
+            {
+              "name": "level",
+              "value": "campaign"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "3",
+          "name": "Meta Bearer Token"
+        }
+      }
+    },
+    {
+      "id": "wf1-009",
+      "name": "Parse Meta Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1720, 320],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const insights = $input.all();\nconst clientItem = $('Get Active Clients').first();\nconst first = insights[0]?.json;\n\nif (!first || first.error || first.message) {\n  return [{ json: { platform: 'meta', client: clientItem.json.client_id, impressions: 0, clicks: 0, spend: 0, revenue: 0, conversions: 0, error: true } }];\n}\n\nreturn insights.map(item => {\n  const d = item.json.data?.[0] || item.json;\n  const conversions = d.actions?.find(\n    a => a.action_type === 'purchase'\n  )?.value || 0;\n  const revenue = d.action_values?.find(\n    a => a.action_type === 'purchase'\n  )?.value || 0;\n\n  return {\n    json: {\n      platform: 'meta',\n      campaign_id: d.campaign_id || item.json.id,\n      campaign_name: d.campaign_name || item.json.name,\n      client: clientItem.json.client_id,\n      impressions: parseInt(d.impressions) || 0,\n      clicks: parseInt(d.clicks) || 0,\n      ctr: parseFloat(d.ctr) || 0,\n      spend: parseFloat(d.spend) || 0,\n      cpc: parseFloat(d.cpc) || 0,\n      conversions: parseInt(conversions),\n      revenue: parseFloat(revenue),\n      date: d.date_start || $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'),\n      status: 'Active',\n      source: 'Meta Ads'\n    }\n  };\n});"
+      }
+    },
+    {
+      "id": "wf1-010",
+      "name": "Google Ads Query",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 540],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/v17/customers/{{ $json.google_ads_customer_id }}/googleAds:searchStream",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "developer-token",
+              "value": "YOUR_GOOGLE_ADS_DEVELOPER_TOKEN"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ query: \"SELECT campaign.id, campaign.name, campaign.status, metrics.impressions, metrics.clicks, metrics.ctr, metrics.cost_micros, metrics.conversions, metrics.conversions_value, metrics.average_cpc FROM campaign WHERE segments.date = '\" + $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') + \"' AND campaign.status IN ('ENABLED', 'PAUSED')\" }) }}"
+      },
+      "credentials": {
+        "googleOAuth2Api": {
+          "id": "2",
+          "name": "Google account"
+        }
+      }
+    },
+    {
+      "id": "wf1-011",
+      "name": "Parse Google Ads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1240, 540],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response = $input.all();\nconst clientItem = $('Get Active Clients').first();\nconst first = response[0]?.json;\n\nif (!first || first.error || (first.status && first.status !== 200)) {\n  return [{ json: { platform: 'google', client: clientItem.json.client_id, impressions: 0, clicks: 0, spend: 0, revenue: 0, conversions: 0, error: true } }];\n}\n\nconst results = [];\n\nfor (const item of response) {\n  for (const result of (item.json.results || [])) {\n    results.push({\n      json: {\n        platform: 'google',\n        campaign_id: result.campaign.id,\n        campaign_name: result.campaign.name,\n        client: clientItem.json.client_id,\n        status: result.campaign.status,\n        impressions: parseInt(result.metrics.impressions) || 0,\n        clicks: parseInt(result.metrics.clicks) || 0,\n        ctr: parseFloat(result.metrics.ctr) || 0,\n        spend: (parseInt(result.metrics.costMicros) || 0) / 1000000,\n        cpc: (parseInt(result.metrics.averageCpc) || 0) / 1000000,\n        conversions: parseFloat(result.metrics.conversions) || 0,\n        revenue: parseFloat(result.metrics.conversionsValue) || 0,\n        date: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'),\n        source: 'Google Ads'\n      }\n    });\n  }\n}\nreturn results;"
+      }
+    },
+    {
+      "id": "wf1-012",
+      "name": "Stripe Get Charges",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 760],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.stripe.com/v1/charges",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "created[gte]",
+              "value": "={{ $now.startOf('day').minus({ days: 1 }).toUnixInteger() }}"
+            },
+            {
+              "name": "created[lt]",
+              "value": "={{ $now.startOf('day').toUnixInteger() }}"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            },
+            {
+              "name": "status",
+              "value": "succeeded"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "4",
+          "name": "Stripe API Key"
+        }
+      }
+    },
+    {
+      "id": "wf1-012b",
+      "name": "Collect Stripe Page",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1240, 760],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response = $input.first().json;\nconst prev = response._accumulated || [];\nconst page = (response._page || 0) + 1;\n\nif (!response || response.error) {\n  return [{ json: { _accumulated: prev, has_more: false, last_id: null, _page: page } }];\n}\n\nconst pageCharges = response.data || [];\nconst accumulated = [...prev, ...pageCharges];\nconst lastId = pageCharges[pageCharges.length - 1]?.id || null;\n// Safety: cap at 10 pages (1,000 charges) to prevent infinite loops\nconst hasMore = page < 10 ? (response.has_more || false) : false;\n\nreturn [{ json: { _accumulated: accumulated, has_more: hasMore, last_id: lastId, _page: page } }];"
+      }
+    },
+    {
+      "id": "wf1-012c",
+      "name": "More Stripe Pages?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1460, 760],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.has_more }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equal" }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "wf1-012d",
+      "name": "Stripe Next Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1680, 680],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.stripe.com/v1/charges",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "created[gte]", "value": "={{ $now.startOf('day').minus({ days: 1 }).toUnixInteger() }}" },
+            { "name": "created[lt]",  "value": "={{ $now.startOf('day').toUnixInteger() }}" },
+            { "name": "limit",         "value": "100" },
+            { "name": "status",        "value": "succeeded" },
+            { "name": "starting_after","value": "={{ $json.last_id }}" }
+          ]
+        }
+      },
+      "credentials": {
+        "httpBearerAuth": { "id": "4", "name": "Stripe API Key" }
+      }
+    },
+    {
+      "id": "wf1-013",
+      "name": "Aggregate Stripe Revenue",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 840],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const item = $input.first().json;\nconst charges = item._accumulated || [];\nconst clientItem = $('Get Active Clients').first();\n\nlet totalRevenue = 0;\nlet totalOrders = 0;\n\nfor (const c of charges) {\n  totalRevenue += (c.amount || 0) / 100;\n  totalOrders += 1;\n}\n\nreturn [{\n  json: {\n    date: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'),\n    total_revenue: parseFloat(totalRevenue.toFixed(2)),\n    total_orders: totalOrders,\n    avg_order_value: totalOrders > 0 ? parseFloat((totalRevenue / totalOrders).toFixed(2)) : 0,\n    client_id: clientItem.json.client_id,\n    client: clientItem.json.client_id,\n    platform: 'stripe',\n    source: 'Stripe',\n    channel: 'Direct / Revenue',\n    revenue: parseFloat(totalRevenue.toFixed(2)),\n    transactions: totalOrders,\n    spend: 0\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf1-014",
+      "name": "Mailchimp Get Reports",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 980],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "GET",
+        "url": "=https://{{ $('Split In Batches').first().json.mailchimp_dc || 'us1' }}.api.mailchimp.com/3.0/reports",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "count",
+              "value": "10"
+            },
+            {
+              "name": "since_send_time",
+              "value": "={{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "5",
+          "name": "Mailchimp Basic Auth"
+        }
+      }
+    },
+    {
+      "id": "wf1-015",
+      "name": "Parse Email Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1240, 980],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const response = $input.all();\nconst clientItem = $('Get Active Clients').first();\nconst first = response[0]?.json;\n\nif (!first || first.error || first.status === 401 || first.status === 403) {\n  return [{ json: { platform: 'email', client: clientItem.json.client_id, impressions: 0, clicks: 0, revenue: 0, conversions: 0, spend: 0, date: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'), error: true } }];\n}\n\nconst allReports = [];\n\nfor (const item of response) {\n  const reports = item.json.reports || [item.json];\n  for (const r of reports) {\n    if (!r.id) continue;\n    allReports.push({\n      json: {\n        platform: 'email',\n        campaign_id: r.id,\n        campaign_name: r.settings?.subject_line || 'Email Campaign',\n        client: clientItem.json.client_id,\n        impressions: r.emails_sent || 0,\n        opens: r.opens?.unique_opens || 0,\n        clicks: r.clicks?.unique_clicks || 0,\n        ctr: r.clicks?.click_rate || 0,\n        spend: 0,\n        revenue: r.ecommerce?.total_revenue || 0,\n        conversions: r.ecommerce?.total_orders || 0,\n        date: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'),\n        source: 'Mailchimp'\n      }\n    });\n  }\n}\nreturn allReports.length > 0 ? allReports : [{ json: { platform: 'email', client: clientItem.json.client_id, impressions: 0, clicks: 0, revenue: 0, conversions: 0, spend: 0, date: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') } }];"
+      }
+    },
+    {
+      "id": "wf1-016",
+      "name": "Merge All Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [2000, 500],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 5
+      }
+    },
+    {
+      "id": "wf1-017",
+      "name": "Upsert Campaigns",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [2240, 500],
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Campaigns",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": ["campaign_id"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf1-018",
+      "name": "Create Revenue Record",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [2480, 500],
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Revenue",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "client": "={{ $json.client || $json.client_id }}",
+            "week_label": "={{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+            "week_start": "={{ $now.minus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+            "channel": "={{ $json.channel || $json.platform }}",
+            "revenue": "={{ $json.revenue || $json.total_revenue || 0 }}",
+            "transactions": "={{ $json.transactions || $json.conversions || $json.total_orders || 0 }}",
+            "source": "={{ $json.source || $json.platform }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf1-019",
+      "name": "Aggregate KPI Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2720, 500],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const allData = $input.all();\nlet totalRevenue = 0, totalSpend = 0,\n    totalSessions = 0, totalOrders = 0;\nconst clientItem = $('Get Active Clients').first();\n\nfor (const item of allData) {\n  totalRevenue += item.json.revenue || item.json.total_revenue || 0;\n  totalSpend += item.json.spend || 0;\n  totalSessions += item.json.sessions || 0;\n  totalOrders += item.json.conversions || item.json.transactions || item.json.total_orders || 0;\n}\n\nconst convRate = totalSessions > 0\n  ? (totalOrders / totalSessions) * 100 : 0;\nconst roas = totalSpend > 0\n  ? totalRevenue / totalSpend : 0;\nconst aov = totalOrders > 0\n  ? totalRevenue / totalOrders : 0;\n\nreturn [{\n  json: {\n    client: clientItem.json.client_id,\n    snapshot_date: $now.minus({ days: 1 }).toFormat('yyyy-MM-dd'),\n    period_type: 'Daily',\n    total_revenue: parseFloat(totalRevenue.toFixed(2)),\n    ad_spend: parseFloat(totalSpend.toFixed(2)),\n    roas: parseFloat(roas.toFixed(2)),\n    conversion_rate: parseFloat(convRate.toFixed(2)),\n    total_orders: totalOrders,\n    total_sessions: totalSessions,\n    avg_order_value: parseFloat(aov.toFixed(2))\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf1-020",
+      "name": "Write KPI Snapshot",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [2960, 500],
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "KPI Snapshots",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Get Active Clients", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Active Clients": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          { "node": "GA4 Run Report", "type": "main", "index": 0 },
+          { "node": "Meta Get Campaigns", "type": "main", "index": 0 },
+          { "node": "Google Ads Query", "type": "main", "index": 0 },
+          { "node": "Stripe Get Charges", "type": "main", "index": 0 },
+          { "node": "Mailchimp Get Reports", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    },
+    "GA4 Run Report": {
+      "main": [
+        [
+          { "node": "Parse GA4 Response", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Parse GA4 Response": {
+      "main": [
+        [
+          { "node": "Merge All Sources", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Meta Get Campaigns": {
+      "main": [
+        [
+          { "node": "Meta Inner Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Meta Inner Batches": {
+      "main": [
+        [
+          { "node": "Meta Get Insights", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Merge All Sources", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Meta Get Insights": {
+      "main": [
+        [
+          { "node": "Parse Meta Data", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Parse Meta Data": {
+      "main": [
+        [
+          { "node": "Meta Inner Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Google Ads Query": {
+      "main": [
+        [
+          { "node": "Parse Google Ads", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Parse Google Ads": {
+      "main": [
+        [
+          { "node": "Merge All Sources", "type": "main", "index": 2 }
+        ]
+      ]
+    },
+    "Stripe Get Charges": {
+      "main": [
+        [
+          { "node": "Collect Stripe Page", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Collect Stripe Page": {
+      "main": [
+        [
+          { "node": "More Stripe Pages?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "More Stripe Pages?": {
+      "main": [
+        [
+          { "node": "Stripe Next Page", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Aggregate Stripe Revenue", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Stripe Next Page": {
+      "main": [
+        [
+          { "node": "Collect Stripe Page", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Aggregate Stripe Revenue": {
+      "main": [
+        [
+          { "node": "Merge All Sources", "type": "main", "index": 3 }
+        ]
+      ]
+    },
+    "Mailchimp Get Reports": {
+      "main": [
+        [
+          { "node": "Parse Email Data", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Parse Email Data": {
+      "main": [
+        [
+          { "node": "Merge All Sources", "type": "main", "index": 4 }
+        ]
+      ]
+    },
+    "Merge All Sources": {
+      "main": [
+        [
+          { "node": "Upsert Campaigns", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Upsert Campaigns": {
+      "main": [
+        [
+          { "node": "Create Revenue Record", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Create Revenue Record": {
+      "main": [
+        [
+          { "node": "Aggregate KPI Data", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Aggregate KPI Data": {
+      "main": [
+        [
+          { "node": "Write KPI Snapshot", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Write KPI Snapshot": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "workflow-1"
+}

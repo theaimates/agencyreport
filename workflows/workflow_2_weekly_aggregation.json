@@ -1,0 +1,235 @@
+{
+  "name": "WF2: Weekly Aggregation",
+  "nodes": [
+    {
+      "id": "wf2-001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 400],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [1],
+              "triggerAtHour": 7,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wf2-002",
+      "name": "Get Active Clients",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [500, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Clients",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "{status} = 'Active'"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf2-003",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [750, 400],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "wf2-004",
+      "name": "Get Last 7 Days Revenue",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1000, 280],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Revenue",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.client_id }}', IS_AFTER({week_start}, DATEADD(TODAY(), -7, 'days')))"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf2-005",
+      "name": "Get Last 7 Days Campaigns",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1000, 520],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Campaigns",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "=AND({client} = '{{ $json.client_id }}', IS_AFTER({last_synced}, DATEADD(TODAY(), -7, 'days')))"
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf2-006",
+      "name": "Inner Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1240, 400],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "wf2-007",
+      "name": "Calculate Weekly Totals",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1480, 400],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const revenue = $('Get Last 7 Days Revenue').all();\nconst campaigns = $('Get Last 7 Days Campaigns').all();\nconst clientItem = $('Get Active Clients').first();\n\nconst periodStart = $now.minus({ days: 7 }).toFormat('yyyy-MM-dd');\nconst periodEnd = $now.minus({ days: 1 }).toFormat('yyyy-MM-dd');\nconst weekLabel = `Week of ${periodStart}`;\n\n// Group revenue by channel\nconst byChannel = {};\nfor (const r of revenue) {\n  const ch = r.json.channel || r.json.source || 'Unknown';\n  if (!byChannel[ch]) byChannel[ch] = { revenue: 0, transactions: 0 };\n  byChannel[ch].revenue += r.json.revenue || 0;\n  byChannel[ch].transactions += r.json.transactions || 0;\n}\n\n// Calculate spend per platform from campaigns\nconst spendByPlatform = {};\nfor (const c of campaigns) {\n  const p = c.json.platform || 'unknown';\n  if (!spendByPlatform[p]) spendByPlatform[p] = 0;\n  spendByPlatform[p] += c.json.spend || 0;\n}\n\n// GA4 channel name → spend platform key mapping\nconst channelMap = {\n  'Organic Search': 'organic',\n  'Paid Search': 'google',\n  'Organic Social': 'organic',\n  'Paid Social': 'meta',\n  'Email': 'email',\n  'Direct': 'direct',\n  'Referral': 'referral',\n  'Display': 'google',\n  'Affiliate': 'affiliate'\n};\n\n// Build channel performance records\nconst channelPerf = Object.entries(byChannel).map(([ch, data]) => {\n  const platformKey = channelMap[ch] || ch.toLowerCase().split(' ')[0];\n  const chSpend = spendByPlatform[platformKey] || 0;\n  const roas = chSpend > 0 ? parseFloat((data.revenue / chSpend).toFixed(2)) : 0;\n\n  return {\n    json: {\n      client: clientItem.json.client_id,\n      channel: ch,\n      period_start: periodStart,\n      period_end: periodEnd,\n      week_label: weekLabel,\n      total_revenue: parseFloat(data.revenue.toFixed(2)),\n      total_spend: parseFloat(chSpend.toFixed(2)),\n      roas: roas,\n      total_transactions: data.transactions\n    }\n  };\n});\n\nreturn channelPerf.length > 0 ? channelPerf : [{\n  json: {\n    client: clientItem.json.client_id,\n    channel: 'No Data',\n    period_start: periodStart,\n    period_end: periodEnd,\n    week_label: weekLabel,\n    total_revenue: 0,\n    total_spend: 0,\n    roas: 0\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf2-008",
+      "name": "Write Channel Performance",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1720, 400],
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Channel Performance",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Get Active Clients", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Active Clients": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          { "node": "Get Last 7 Days Revenue", "type": "main", "index": 0 },
+          { "node": "Get Last 7 Days Campaigns", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    },
+    "Get Last 7 Days Revenue": {
+      "main": [
+        [
+          { "node": "Inner Merge", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Last 7 Days Campaigns": {
+      "main": [
+        [
+          { "node": "Inner Merge", "type": "main", "index": 1 }
+        ]
+      ]
+    },
+    "Inner Merge": {
+      "main": [
+        [
+          { "node": "Calculate Weekly Totals", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Calculate Weekly Totals": {
+      "main": [
+        [
+          { "node": "Write Channel Performance", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Write Channel Performance": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "workflow-2"
+}

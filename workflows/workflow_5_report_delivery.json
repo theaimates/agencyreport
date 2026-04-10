@@ -1,0 +1,223 @@
+{
+  "name": "WF5: Report Delivery",
+  "nodes": [
+    {
+      "id": "wf5-001",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 400],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [1],
+              "triggerAtHour": 10,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "wf5-002",
+      "name": "Get Pending Summaries",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [500, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "AI Summaries",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "{status} = 'Draft'",
+          "sort": [
+            {
+              "field": "generated_at",
+              "direction": "desc"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf5-003",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [750, 400],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "wf5-004",
+      "name": "Get Client Info",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1000, 400],
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "Clients",
+          "mode": "name"
+        },
+        "options": {
+          "filterByFormula": "={client_id} = '{{ $json.client }}'",
+          "maxRecords": 1
+        }
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "id": "wf5-005",
+      "name": "Build Email HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1240, 400],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const client = $('Get Client Info').first().json;\nconst summary = $('Split In Batches').first().json;\nconst brandColor = client.brand_color || '#6366f1';\n\nconst insightIcons = { win: '🏆', watch: '⚠️', next: '🚀' };\nconst i1Icon = insightIcons[summary.insight_1_type] || '💡';\nconst i2Icon = insightIcons[summary.insight_2_type] || '💡';\nconst i3Icon = insightIcons[summary.insight_3_type] || '💡';\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <style>\n    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; max-width: 600px; margin: 0 auto; padding: 20px; background: #ffffff; }\n    .header { border-bottom: 3px solid ${brandColor}; padding-bottom: 16px; margin-bottom: 24px; }\n    .header h1 { margin: 0; font-size: 22px; color: #1a1a1a; }\n    .header p { color: #666; font-size: 13px; margin: 6px 0 0; }\n    .body { font-size: 15px; line-height: 1.7; color: #333; margin-bottom: 24px; }\n    .body .hl { color: ${brandColor}; font-weight: 600; }\n    .insights-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #999; margin-bottom: 12px; }\n    .insight { background: #f8f9fa; border-radius: 8px; padding: 14px 18px; margin: 8px 0; border-left: 3px solid ${brandColor}; }\n    .insight-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #1a1a1a; }\n    .insight-text { font-size: 13px; color: #555; line-height: 1.5; }\n    .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 11px; color: #aaa; text-align: center; }\n  </style>\n</head>\n<body>\n  <div class=\"header\">\n    <h1>Weekly Report — ${client.company_name || 'Your Company'}</h1>\n    <p>${summary.period_start || ''} to ${summary.period_end || ''}</p>\n  </div>\n  <div class=\"body\">${summary.body_html || '<p>No report body available.</p>'}</div>\n  <div class=\"insights-title\">This Week's Insights</div>\n  <div class=\"insight\">\n    <div class=\"insight-title\">${i1Icon} ${summary.insight_1_title || 'Win'}</div>\n    <div class=\"insight-text\">${summary.insight_1_text || ''}</div>\n  </div>\n  <div class=\"insight\">\n    <div class=\"insight-title\">${i2Icon} ${summary.insight_2_title || 'Watch'}</div>\n    <div class=\"insight-text\">${summary.insight_2_text || ''}</div>\n  </div>\n  <div class=\"insight\">\n    <div class=\"insight-title\">${i3Icon} ${summary.insight_3_title || 'Next Steps'}</div>\n    <div class=\"insight-text\">${summary.insight_3_text || ''}</div>\n  </div>\n  <div class=\"footer\">\n    Generated by ReportFlow\n  </div>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    html,\n    to_email: client.contact_email,\n    company_name: client.company_name || 'Client',\n    period_start: summary.period_start,\n    summary_record_id: summary.id\n  }\n}];"
+      }
+    },
+    {
+      "id": "wf5-006",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1480, 400],
+      "parameters": {
+        "operation": "send",
+        "toEmail": "={{ $json.to_email }}",
+        "subject": "=Weekly Report — {{ $json.company_name }} ({{ $json.period_start }})",
+        "emailType": "html",
+        "message": "={{ $json.html }}",
+        "options": {
+          "senderName": "ReportFlow",
+          "replyTo": ""
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "wf5-007",
+      "name": "Update Summary Status",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [1720, 400],
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "value": "AI Summaries",
+          "mode": "name"
+        },
+        "id": "={{ $('Build Email HTML').first().json.summary_record_id }}",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Sent"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          { "node": "Get Pending Summaries", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Get Pending Summaries": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          { "node": "Get Client Info", "type": "main", "index": 0 }
+        ],
+        []
+      ]
+    },
+    "Get Client Info": {
+      "main": [
+        [
+          { "node": "Build Email HTML", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Build Email HTML": {
+      "main": [
+        [
+          { "node": "Send Email", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        [
+          { "node": "Update Summary Status", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Update Summary Status": {
+      "main": [
+        [
+          { "node": "Split In Batches", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "workflow-5"
+}

@@ -53,6 +53,15 @@ export default function Sidebar({ activeSection, isOpen, onNavigate, onClose }: 
         <div className="integration-item"><span className="status-dot" /> Stripe</div>
         <div className="integration-item"><span className="status-dot" /> Mailchimp</div>
       </div>
+      <a
+        href="https://theaimates.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="built-by-cta"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="built-by-icon"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        BUILT THIS!
+      </a>
     </aside>
   )
 }
